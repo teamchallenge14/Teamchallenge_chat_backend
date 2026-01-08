@@ -4,54 +4,98 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+
+import { initSentry } from './sentry/sentry.config';
+import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
+import { SentryExceptionFilter } from './sentry/sentry.filter';
+import { Logger } from 'nestjs-pino';
+import { createLogStream } from './logger/log-stream';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
 
+  const env = config.getOrThrow<string>('NODE_ENV');
+  const port = config.getOrThrow<number>('PORT');
+  const swaggerPath = config.getOrThrow<string>('SWAGGER_PATH');
+  const corsOrigins = config.getOrThrow<string>('CORS_ORIGINS').split(',');
+  const logDir = config.getOrThrow<string>('LOG_DIR');
+
+  // SENTRY
+  initSentry(config);
+
+  // GLOBALS
+  app.useGlobalInterceptors(new RequestIdInterceptor());
+  app.useGlobalFilters(new SentryExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
 
-  app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173',
-      'https://your-frontend.com',
-    ],
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  });
-
-  const configService = app.get(ConfigService);
-
-  // Swagger setup
-  const config = new DocumentBuilder()
-    .setTitle('TeamChallengeChatApi')
-    .setDescription('API for TeamChallengeChat  ')
-    .setVersion('1.0')
-    .addBearerAuth() // JWT auth
-    .build();
-
   app.use(cookieParser());
 
-  // env
-  const env = configService.get('NODE_ENV', 'development');
+  // CORS
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+  });
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(configService.get('SWAGGER_PATH') || 'api', app, document);
+  // logs
+  const accessLogStream = createLogStream(logDir, config.getOrThrow<string>('MORGAN_ACCESS_LOG'));
 
-  await app.listen(configService.get('PORT') ?? 3000);
+  const errorLogStream = createLogStream(logDir, config.getOrThrow<string>('MORGAN_ERROR_LOG'));
+  // MORGAN
+  if (env !== 'production') {
+    // access log
+    app.use(
+      morgan('dev', {
+        stream: accessLogStream,
+      }),
+    );
 
-  console.log(`Environment: ${env}`);
-  console.log('MONGO_DATABASE_URL =', configService.get('MONGO_DATABASE_URL'));
-  console.log('POSTGRES_DATABASE_URL =', configService.get('POSTGRES_DATABASE_URL'));
-  console.log(
-    'API on http://localhost:' + configService.get('PORT') + configService.get('SWAGGER_PATH'),
+    // morgan error log
+    app.use(
+      morgan('dev', {
+        skip: (_, res) => res.statusCode < 500,
+        stream: errorLogStream,
+      }),
+    );
+  } else {
+    // morgan prod
+    app.use(
+      morgan('combined', {
+        skip: (_, res) => res.statusCode < 500,
+        stream: errorLogStream,
+      }),
+    );
+  }
+
+  // SWAGGER
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('TeamChallengeChatApi')
+    .setDescription('API for TeamChallengeChat')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(swaggerPath, app, document);
+
+  const logger = app.get(Logger);
+
+  await app.listen(port);
+
+  logger.log(
+    {
+      env,
+      port,
+    },
+    'Application started',
   );
 }
 

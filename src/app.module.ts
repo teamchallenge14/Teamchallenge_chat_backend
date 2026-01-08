@@ -1,31 +1,39 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
 import { UsersModule } from './users/users.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PrismaModule } from 'prisma/prisma.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { InterestModule } from './interest/interest.module';
 import { MailModule } from './mail/mail.module';
+import { PrismaModule } from 'prisma/prisma.module';
+import { PinoLoggerModule } from './logger/pino.module';
 
 @Module({
   imports: [
-    UsersModule,
-    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'production' ? '.env.prod' : '.env',
     }),
+
+    // LOGGER
+    PinoLoggerModule,
+
+    // DATABASES
     PrismaModule,
-    // Mongo
+
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        uri: config.get<string>('MONGO_DATABASE_URL'),
+        uri: config.getOrThrow<string>('MONGO_DATABASE_URL'),
       }),
     }),
+
+    // FEATURES
+    UsersModule,
+    AuthModule,
     InterestModule,
     MailModule,
   ],
