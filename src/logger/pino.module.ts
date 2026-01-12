@@ -1,19 +1,17 @@
 import { Module } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import path from 'path';
 import fs from 'fs';
 import pino from 'pino';
 import pretty from 'pino-pretty';
+import { appConfig, loggerConfig } from 'src/config';
 
 @Module({
   imports: [
-    ConfigModule,
     LoggerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const nodeEnv = config.getOrThrow<string>('NODE_ENV');
-        const logDirFromEnv = config.get<string>('LOG_DIR', 'logs');
+      useFactory: () => {
+        const nodeEnv = appConfig.nodeEnv;
+        const logDirFromEnv = loggerConfig.dir;
 
         const logDir = path.resolve(process.cwd(), logDirFromEnv);
         fs.mkdirSync(logDir, { recursive: true });

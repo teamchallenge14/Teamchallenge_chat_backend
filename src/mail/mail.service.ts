@@ -1,27 +1,24 @@
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import * as bcrypt from 'bcrypt';
 import { MailType } from './mail.types';
 import { verifyEmailTemplate } from './templates/verify-email.template';
 import { PrismaService } from 'prisma/prisma.service';
 import { resetPasswordTemplate } from './templates/reset-password.template';
+import { mailConfig } from 'src/config';
 
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
 
-  constructor(
-    private readonly config: ConfigService,
-    private readonly prisma: PrismaService,
-  ) {
+  constructor(private readonly prisma: PrismaService) {
     this.transporter = nodemailer.createTransport({
-      host: this.config.get<string>('MAIL_HOST'),
-      port: Number(this.config.get<string>('MAIL_PORT')),
+      host: mailConfig.host,
+      port: mailConfig.port,
       secure: false,
       auth: {
-        user: this.config.get<string>('MAIL_USER'),
-        pass: this.config.get<string>('MAIL_PASS'),
+        user: mailConfig.user,
+        pass: mailConfig.pass,
       },
     });
   }
@@ -84,7 +81,7 @@ export class MailService {
     const template = verifyEmailTemplate(code);
 
     await this.transporter.sendMail({
-      from: this.config.get<string>('MAIL_FROM'),
+      from: mailConfig.from,
       to: email,
       subject: template.subject,
       html: template.html,
@@ -180,7 +177,7 @@ export class MailService {
     const template = resetPasswordTemplate(code);
 
     await this.transporter.sendMail({
-      from: this.config.get<string>('MAIL_FROM'),
+      from: mailConfig.from,
       to: email,
       subject: template.subject,
       html: template.html,

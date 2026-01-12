@@ -4,12 +4,9 @@ import * as Sentry from '@sentry/nestjs';
 @Injectable()
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest();
-    const user = req.user;
+    const { user } = context.switchToHttp().getRequest();
 
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    if (!user) throw new UnauthorizedException();
 
     Sentry.setUser({
       id: user.id,

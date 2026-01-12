@@ -1,9 +1,12 @@
 import * as Sentry from '@sentry/nestjs';
-import { type ConfigService } from '@nestjs/config';
+import { sentryConfig } from 'src/config';
 
-export function initSentry(config: ConfigService) {
-  const dsn = config.getOrThrow<string>('SENTRY_DSN');
-  const env = config.getOrThrow<string>('NODE_ENV');
+export function initSentry() {
+  if (!sentryConfig.enabled) {
+    return;
+  }
+  const dsn = sentryConfig.dsn;
+  const env = sentryConfig.environment;
 
   Sentry.init({
     dsn,

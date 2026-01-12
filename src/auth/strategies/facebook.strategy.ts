@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthProvider } from '@prisma/client';
 import { Strategy } from 'passport-facebook';
+import { oauthConfig } from 'src/config';
 
 interface FacebookProfile {
   id: string;
@@ -11,10 +11,10 @@ interface FacebookProfile {
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
-  constructor(config: ConfigService) {
+  constructor() {
     super({
-      clientID: config.getOrThrow<string>('FACEBOOK_APP_ID'),
-      clientSecret: config.getOrThrow<string>('FACEBOOK_APP_SECRET'),
+      clientID: oauthConfig.facebook.appId,
+      clientSecret: oauthConfig.facebook.appSecret,
       callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/facebook/callback',
       profileFields: ['id', 'emails', 'name'],
     });

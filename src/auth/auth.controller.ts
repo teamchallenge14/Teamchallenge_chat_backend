@@ -24,16 +24,13 @@ import {
 } from '@nestjs/swagger';
 import { PublicUserDto } from 'src/users/dto/public-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
+import { appConfig } from 'src/config';
 
 @ApiTags('Auth')
 @Controller(routesV1.version)
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   // =========================
   // REGISTER (LOCAL)
@@ -153,7 +150,7 @@ export class AuthController {
       res,
     );
 
-    res.redirect(this.configService.getOrThrow<string>('FRONTEND_URL'));
+    res.redirect(appConfig.frontendUrl);
   }
 
   // =========================
@@ -193,7 +190,7 @@ export class AuthController {
       res,
     );
 
-    res.redirect(this.configService.getOrThrow<string>('FRONTEND_URL'));
+    res.redirect(appConfig.frontendUrl);
   }
 
   // =========================
@@ -228,14 +225,14 @@ export class AuthController {
       res,
     );
 
-    res.redirect(this.configService.getOrThrow<string>('FRONTEND_URL'));
+    res.redirect(appConfig.frontendUrl);
   }
 
   // =========================
   // HELPERS
   // =========================
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
-    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    const isProd = appConfig.nodeEnv === 'production';
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthProvider } from '@prisma/client';
 import { Strategy } from 'passport-github2';
+import { oauthConfig } from 'src/config';
 
 interface GithubProfile {
   id: string;
@@ -12,10 +12,10 @@ interface GithubProfile {
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
-  constructor(config: ConfigService) {
+  constructor() {
     super({
-      clientID: config.getOrThrow<string>('GITHUB_CLIENT_ID'),
-      clientSecret: config.getOrThrow<string>('GITHUB_CLIENT_SECRET'),
+      clientID: oauthConfig.github.clientId,
+      clientSecret: oauthConfig.github.clientSecret,
       callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/github/callback',
       scope: ['user:email'],
     });
