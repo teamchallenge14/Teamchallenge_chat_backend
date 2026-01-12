@@ -11,8 +11,44 @@ import { appConfig, loggerConfig } from 'src/config';
     LoggerModule.forRootAsync({
       useFactory: () => {
         const nodeEnv = appConfig.nodeEnv;
-        const logDirFromEnv = loggerConfig.dir;
+        const isProduction = nodeEnv === 'production';
 
+        // Production: JSON to stdout, no files, minimal logging
+        if (isProduction) {
+          return {
+            pinoHttp: {
+              level: 'warn',
+              autoLogging: false, // Disable automatic request logging in production
+
+              serializers: {
+                req(req) {
+                  return {
+                    method: req.method,
+                    url: req.url,
+                  };
+                },
+
+                res(res) {
+                  return {
+                    statusCode: res.statusCode,
+                  };
+                },
+
+                err(err) {
+                  return {
+                    type: err.type,
+                    message: err.message,
+                    stack: err.stack,
+                  };
+                },
+              },
+              redact: ['req.headers.authorization', 'req.headers["set-cookie"]'],
+            },
+          };
+        }
+
+        // Development: Pretty console + file logging
+        const logDirFromEnv = loggerConfig.dir;
         const logDir = path.resolve(process.cwd(), logDirFromEnv);
         fs.mkdirSync(logDir, { recursive: true });
 
@@ -56,7 +92,7 @@ import { appConfig, loggerConfig } from 'src/config';
 
         return {
           pinoHttp: {
-            level: nodeEnv === 'production' ? 'info' : 'debug',
+            level: 'debug',
             autoLogging: true,
 
             stream: pino.multistream(streams),
@@ -66,10 +102,7 @@ import { appConfig, loggerConfig } from 'src/config';
                 return {
                   method: req.method,
                   url: req.url,
-
-                  ...(nodeEnv === 'development' && {
-                    cookies: req.headers?.cookie,
-                  }),
+                  cookies: req.headers?.cookie,
                 };
               },
 
