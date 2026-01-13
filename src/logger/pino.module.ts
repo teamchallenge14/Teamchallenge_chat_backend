@@ -3,7 +3,6 @@ import { LoggerModule } from 'nestjs-pino';
 import path from 'path';
 import fs from 'fs';
 import pino from 'pino';
-// @ts-expect-error Import only for dev logging
 import pretty from 'pino-pretty';
 import { appConfig, loggerConfig } from 'src/config';
 
