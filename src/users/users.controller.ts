@@ -9,14 +9,13 @@ import {
   HttpCode,
   HttpStatus,
   Query,
-  ParseIntPipe,
   Put,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { routesV1 } from 'src/config/app.routes';
+import { routesV1 } from '@src/config/app.routes';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -28,7 +27,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PublicUserDto } from './dto/public-user.dto';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationQueryDto } from '@src/common/dto/pagination-query.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-User.dto';
@@ -90,7 +89,7 @@ export class UsersController {
   @Patch(routesV1.user.update)
   @ApiOkResponse({ type: FullUserDto })
   async update(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
   ): Promise<FullUserDto> {
     return this.usersService.update(id, dto);
@@ -106,7 +105,7 @@ export class UsersController {
     description: 'User successfully deleted',
   })
   @ApiNotFoundResponse({ description: 'User not found' })
-  async delete(@Param('id', ParseIntPipe) id: string): Promise<void> {
+  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     await this.usersService.delete(id);
   }
 

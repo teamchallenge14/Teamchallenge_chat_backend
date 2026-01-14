@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AccountStatus, Gender } from '@prisma/client';
-import { InterestDto } from 'src/interest/dto/interest.dto';
+import { InterestDto } from '@src/interest/dto/interest.dto';
 
 export class FullUserDto {
   @ApiProperty({

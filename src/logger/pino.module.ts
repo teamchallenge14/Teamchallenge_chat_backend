@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import pino from 'pino';
 import pretty from 'pino-pretty';
-import { appConfig, loggerConfig } from 'src/config';
+import { appConfig, loggerConfig } from '@src/config';
 
 @Module({
   imports: [

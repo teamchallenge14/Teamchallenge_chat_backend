@@ -5,7 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '@src/users/users.module';
 
 import { AccessTokenService } from './access-token/access-token.service';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
@@ -16,7 +16,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { FacebookStrategy } from './strategies/facebook.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { jwtConfig } from 'src/config';
+import { jwtConfig } from '@src/config';
 
 @Module({
   imports: [

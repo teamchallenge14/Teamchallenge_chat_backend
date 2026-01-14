@@ -3,9 +3,9 @@ import * as nodemailer from 'nodemailer';
 import * as bcrypt from 'bcrypt';
 import { MailType } from './mail.types';
 import { verifyEmailTemplate } from './templates/verify-email.template';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { resetPasswordTemplate } from './templates/reset-password.template';
-import { mailConfig } from 'src/config';
+import { mailConfig } from '@src/config';
 
 @Injectable()
 export class MailService {

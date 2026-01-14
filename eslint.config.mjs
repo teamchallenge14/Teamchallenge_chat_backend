@@ -1,4 +1,3 @@
-// @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
@@ -25,7 +24,21 @@ export default tseslint.config(
       sourceType: 'commonjs',
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    files: ['jest.config.ts', 'jest-e2e.config.ts'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    settings: {
+      'import/resolver': {
+        typescript: {
+          project: ['./tsconfig.json', './tsconfig.build.json'],
+        },
       },
     },
   },
@@ -34,6 +47,7 @@ export default tseslint.config(
     plugins: {
       'unused-imports': unusedImports,
     },
+
     rules: {
       /* ---------- Clean code ---------- */
       'unused-imports/no-unused-imports': 'error',
@@ -70,6 +84,12 @@ export default tseslint.config(
         {
           prefer: 'type-imports',
           fixStyle: 'inline-type-imports',
+        },
+      ],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['src/*', 'prisma/*'],
         },
       ],
       '@typescript-eslint/no-duplicate-enum-values': 'error',

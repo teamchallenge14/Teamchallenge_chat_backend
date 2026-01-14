@@ -7,7 +7,7 @@ import {
   Patch,
   Post,
   Query,
-  ParseIntPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 
@@ -37,19 +37,19 @@ export class InterestController {
   @Get(':id')
   @ApiOperation({ summary: 'Get interest by id' })
   @ApiParam({ name: 'id', example: 1 })
-  findOne(@Param('id', ParseIntPipe) id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.interestsService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update interest' })
-  update(@Param('id', ParseIntPipe) id: string, @Body() dto: UpdateInterestDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() dto: UpdateInterestDto) {
     return this.interestsService.update(id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete interest' })
-  remove(@Param('id', ParseIntPipe) id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.interestsService.remove(id);
   }
 }

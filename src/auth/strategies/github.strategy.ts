@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthProvider } from '@prisma/client';
 import { Strategy } from 'passport-github2';
-import { oauthConfig } from 'src/config';
+import { oauthConfig } from '@src/config';
 
 interface GithubProfile {
   id: string;

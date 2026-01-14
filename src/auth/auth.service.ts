@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '@src/users/users.service';
 import { AccessTokenService } from './access-token/access-token.service';
 import { RefreshTokenService } from './refresh-token/refresh-token.service';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { PrismaService } from 'prisma/prisma.service';
+import { CreateUserDto } from '@src/users/dto/create-user.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 import { AccountStatus, AuthProvider } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import type { Response, Request } from 'express';

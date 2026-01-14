@@ -9,8 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { routesV1 } from 'src/config/app.routes';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { routesV1 } from '@src/config/app.routes';
+import { CreateUserDto } from '@src/users/dto/create-user.dto';
 import type { Response, Request } from 'express';
 import { AuthProvider } from '@prisma/client';
 import {
@@ -22,10 +22,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { PublicUserDto } from 'src/users/dto/public-user.dto';
+import { PublicUserDto } from '@src/users/dto/public-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginDto } from './dto/login.dto';
-import { appConfig } from 'src/config';
+import { appConfig } from '@src/config';
 
 @ApiTags('Auth')
 @Controller(routesV1.version)

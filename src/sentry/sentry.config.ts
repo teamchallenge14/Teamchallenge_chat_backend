@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nestjs';
-import { sentryConfig } from 'src/config';
+import { sentryConfig } from '@src/config';
 
 export function initSentry() {
   if (!sentryConfig.enabled) {

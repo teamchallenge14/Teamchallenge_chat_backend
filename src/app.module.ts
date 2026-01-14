@@ -8,7 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { InterestModule } from './interest/interest.module';
 import { MailModule } from './mail/mail.module';
-import { PrismaModule } from 'prisma/prisma.module';
+import { PrismaModule } from '@db/prisma.module';
 import { PinoLoggerModule } from './logger/pino.module';
 import { dbConfig } from './config';
 

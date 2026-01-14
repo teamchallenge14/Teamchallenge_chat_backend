@@ -2,7 +2,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MailService } from './mail.service';
 import { MailType } from './mail.types';
-import { routesV1 } from 'src/config/app.routes';
+import { routesV1 } from '@src/config/app.routes';
 
 @ApiTags('Mail')
 @Controller(routesV1.version)
