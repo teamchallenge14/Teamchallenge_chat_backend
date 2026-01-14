@@ -1,11 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, IsInt } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FindOneUserQueryDto {
   @ApiPropertyOptional({ example: 1 })
   @Type(() => String)
-  @IsInt()
+  @IsUUID('4')
   @IsOptional()
   id?: string;
 
