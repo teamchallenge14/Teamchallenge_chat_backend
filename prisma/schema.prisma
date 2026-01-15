@@ -1,5 +1,6 @@
 generator client {
   provider     = "prisma-client-js"
+  url      = env("POSTGRES_DATABASE_URL")
   moduleFormat = "cjs"
 }
 
