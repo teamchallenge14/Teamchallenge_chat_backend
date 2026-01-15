@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "node -p \"require.resolve('@prisma/client')\"",
-    "build": "npm run prisma:generate && tsc -p tsconfig.build.json",
+    "build": "npm ci && node -p \"require.resolve('@prisma/client')\" && npx prisma generate --schema=prisma/schema.prisma && tsc -p tsconfig.build.json",
     "start": "node dist/src/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
