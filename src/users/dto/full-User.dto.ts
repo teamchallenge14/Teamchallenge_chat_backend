@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AccountStatus, Gender } from '@prisma/client';
+import { AccountStatus, AuthProvider, Gender } from '@prisma/client';
 import { InterestDto } from '@src/interest/dto/interest.dto';
-import { IsUUID } from 'class-validator';
+import { IsNumber, IsOptional, IsUUID } from 'class-validator';
 
 export class FullUserDto {
   @ApiProperty({
@@ -55,6 +55,8 @@ export class FullUserDto {
     example: 25,
     minimum: 0,
   })
+  @IsOptional()
+  @IsNumber()
   age?: number;
 
   @ApiProperty({
@@ -68,6 +70,29 @@ export class FullUserDto {
     example: Gender.MALE,
   })
   gender?: Gender;
+
+  @ApiProperty({
+    enum: AuthProvider,
+    example: AuthProvider.LOCAL,
+  })
+  provider?: AuthProvider;
+
+  @ApiPropertyOptional({
+    example: 'ksdkosjdahguwefm',
+    description: 'User provider id for social signin',
+  })
+  providerId?: string;
+
+  @ApiPropertyOptional({
+    example: '2025-01-10T12:00:00.000Z',
+    description: 'User email verification date',
+  })
+  emailVerifiedAt?: Date;
+  @ApiPropertyOptional({
+    example: '2025-01-10T12:00:00.000Z',
+    description: 'User identity verification date',
+  })
+  identityVerifiedAt?: Date;
 
   @ApiProperty({
     example: '2025-01-10T12:00:00.000Z',

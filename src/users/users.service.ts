@@ -193,16 +193,17 @@ export class UsersService {
       select: {
         id: true,
         accountStatus: true,
+        emailVerifiedAt: true,
+        identityVerifiedAt: true,
         createdAt: true,
 
         authMethods: {
-          where: {
-            provider: AuthProvider.LOCAL,
-          },
           take: 1,
           select: {
             email: true,
             login: true,
+            provider: true,
+            providerId: true,
           },
         },
 
@@ -252,6 +253,11 @@ export class UsersService {
       profileTheme: user.data?.profileTheme ?? undefined,
       age: user.data?.age ?? undefined,
       gender: user.data?.gender ?? undefined,
+
+      provider: localAuth.provider,
+      providerId: localAuth.providerId,
+      emailVerifiedAt: user.emailVerifiedAt ?? undefined,
+      identityVerifiedAt: user.identityVerifiedAt ?? undefined,
 
       interests: user.userInterests.map((ui) => ui.interest),
     };

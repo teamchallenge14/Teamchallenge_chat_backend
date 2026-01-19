@@ -26,12 +26,12 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { PublicUserDto } from './dto/public-user.dto';
 import { PaginationQueryDto } from '@src/common/dto/pagination-query.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-User.dto';
 import { SetUserInterestsDto } from './dto/set-user-interests.dto';
+import { CreatedUserDto } from '@src/users/dto/created-user.dto';
 
 @ApiTags(routesV1.user.root)
 @Controller(routesV1.version)
@@ -46,7 +46,7 @@ export class UsersController {
   })
   @ApiCreatedResponse({
     description: 'User successfully created',
-    type: PublicUserDto,
+    type: CreatedUserDto,
   })
   @ApiConflictResponse({
     description: 'User already exists (duplicate login or email)',
@@ -55,7 +55,7 @@ export class UsersController {
     description: 'Validation error',
   })
   @Post(routesV1.user.root)
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto): Promise<CreatedUserDto> {
     return this.usersService.create(createUserDto);
   }
 
