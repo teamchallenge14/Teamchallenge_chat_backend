@@ -1,12 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AccountStatus, Gender } from '@prisma/client';
 import { InterestDto } from '@src/interest/dto/interest.dto';
+import { IsUUID } from 'class-validator';
 
 export class FullUserDto {
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',
     description: 'User ID (UUID)',
   })
+  @IsUUID()
   id: string;
 
   @ApiPropertyOptional({

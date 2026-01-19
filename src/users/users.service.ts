@@ -9,7 +9,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@db/prisma.service';
 // import { Prisma } from '../../generated/prisma/client';
-import { PublicUserDto } from './dto/public-user.dto';
 // import { AccountStatus } from '@src/generated/enums';
 import { PaginationQueryDto } from '@src/common/dto/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dto/paginated-response.dto';
@@ -17,12 +16,13 @@ import { UserListItemDto } from './dto/user-list-item.dto';
 import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-User.dto';
 import { AccountStatus, AuthProvider, Prisma } from '@prisma/client';
+import { CreatedUserDto } from '@src/users/dto/created-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateUserDto): Promise<PublicUserDto> {
+  async create(dto: CreateUserDto): Promise<CreatedUserDto> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     try {
@@ -38,15 +38,40 @@ export class UsersService {
               passwordHash: hashedPassword,
             },
           },
+          data: {
+            create: {
+              firstName: dto.firstName,
+              lastName: dto.lastName,
+              description: dto.description,
+              avatar: dto.avatar,
+              profileTheme: dto.profileTheme,
+              age: dto.age,
+              gender: dto.gender,
+              updatedAt: new Date(),
+            },
+          },
         },
         select: {
           id: true,
           accountStatus: true,
           createdAt: true,
+          data: {
+            select: {
+              firstName: true,
+              lastName: true,
+              description: true,
+              avatar: true,
+              profileTheme: true,
+              age: true,
+              gender: true,
+              updatedAt: true,
+            },
+          },
           authMethods: {
             select: {
               email: true,
               login: true,
+              provider: true,
             },
             where: {
               provider: AuthProvider.LOCAL,
@@ -60,7 +85,7 @@ export class UsersService {
         id: user.id,
         email: user.authMethods[0]?.email ?? undefined,
         login: user.authMethods[0]?.login ?? undefined,
-        accountStatus: user.accountStatus,
+        provider: user.authMethods[0]?.provider,
         createdAt: user.createdAt,
       };
     } catch (e) {
@@ -86,7 +111,13 @@ export class UsersService {
         orderBy: {
           createdAt: 'desc',
         },
+        where: {
+          accountStatus: {
+            not: AccountStatus.DELETED,
+          },
+        },
         select: {
+          id: true,
           createdAt: true,
           authMethods: {
             where: {
@@ -96,6 +127,7 @@ export class UsersService {
             select: {
               email: true,
               login: true,
+              provider: true,
             },
           },
         },
@@ -107,8 +139,10 @@ export class UsersService {
       const localAuth = user.authMethods[0];
 
       return {
+        id: user.id,
         login: localAuth?.login ?? undefined,
         email: localAuth?.email ?? undefined,
+        provider: localAuth.provider,
         createdAt: user.createdAt,
       };
     });

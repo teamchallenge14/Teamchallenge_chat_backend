@@ -26,8 +26,9 @@ import { PublicUserDto } from '@src/users/dto/public-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginDto } from './dto/login.dto';
 import { appConfig } from '@src/config';
+import { CreatedUserDto } from '@src/users/dto/created-user.dto';
 
-@ApiTags('Auth')
+@ApiTags(routesV1.auth.root)
 @Controller(routesV1.version)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -44,14 +45,14 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({
     description: 'User successfully registered',
-    type: PublicUserDto,
+    type: CreatedUserDto,
   })
   @ApiUnauthorizedResponse({ description: 'Registration failed' })
   @ApiCookieAuth('access_token')
   async register(
     @Body() dto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<PublicUserDto> {
+  ): Promise<CreatedUserDto> {
     const { user, accessToken, refreshToken } = await this.authService.register(dto);
 
     this.setAuthCookies(res, accessToken, refreshToken);

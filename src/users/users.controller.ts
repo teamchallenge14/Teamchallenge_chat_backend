@@ -33,7 +33,7 @@ import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-User.dto';
 import { SetUserInterestsDto } from './dto/set-user-interests.dto';
 
-@ApiTags('Users')
+@ApiTags(routesV1.user.root)
 @Controller(routesV1.version)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
