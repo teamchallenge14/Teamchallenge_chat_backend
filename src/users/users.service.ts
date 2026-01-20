@@ -8,8 +8,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@db/prisma.service';
-// import { Prisma } from '../../generated/prisma/client';
-// import { AccountStatus } from '@src/generated/enums';
 import { PaginationQueryDto } from '@src/common/dto/pagination-query.dto';
 import { PaginatedResponseDto } from '@src/common/dto/paginated-response.dto';
 import { UserListItemDto } from './dto/user-list-item.dto';
@@ -268,7 +266,6 @@ export class UsersService {
   // update
   async update(id: string, dto: UpdateUserDto): Promise<UpdatedUserDto> {
     return this.prisma.$transaction(async (tx) => {
-      // 1. Перевірка існування юзера
       const user = await tx.user.findUnique({
         where: { id },
         select: { id: true },
@@ -278,7 +275,7 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      // 2. AuthMethod (тільки LOCAL, пошук по userId + provider)
+      //  AuthMethod ( LOCAL or userId + provider)
       if (dto.login || dto.email || dto.password) {
         const authData = pickDefined({
           login: dto.login,
@@ -303,7 +300,7 @@ export class UsersService {
         });
       }
 
-      // 3. UserData
+      // UserData
       const profileData = pickDefined({
         firstName: dto.firstName,
         lastName: dto.lastName,
@@ -325,7 +322,6 @@ export class UsersService {
         });
       }
 
-      // 4. Повертаємо мінімально достатню сутність
       const updatedUser = await tx.user.findUnique({
         where: { id },
         select: {
@@ -401,51 +397,44 @@ export class UsersService {
 
   // set interest
   async setUserInterests(userId: string, interestIds: string[]): Promise<{ success: true }> {
-    const userExists = await this.prisma.user.findFirst({
-      where: {
-        id: userId,
-        accountStatus: {
-          not: AccountStatus.DELETED,
-        },
-      },
-      select: { id: true },
+    // check user
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { accountStatus: true },
     });
 
-    if (!userExists) {
+    if (!user || user.accountStatus === AccountStatus.DELETED) {
       throw new NotFoundException('User not found');
     }
 
-    if (interestIds.length === 0) {
-      await this.prisma.userInterest.deleteMany({
+    const uniqueInterestIds = [...new Set(interestIds)];
+
+    await this.prisma.$transaction(async (tx) => {
+      if (uniqueInterestIds.length > 0) {
+        const existing = await tx.interest.findMany({
+          where: { id: { in: uniqueInterestIds } },
+          select: { id: true },
+        });
+
+        if (existing.length !== uniqueInterestIds.length) {
+          throw new NotFoundException('One or more interests not found');
+        }
+      }
+
+      await tx.userInterest.deleteMany({
         where: { userId },
       });
 
-      return { success: true };
-    }
-
-    const validCount = await this.prisma.interest.count({
-      where: {
-        id: {
-          in: interestIds,
-        },
-      },
+      if (uniqueInterestIds.length > 0) {
+        await tx.userInterest.createMany({
+          data: uniqueInterestIds.map((interestId) => ({
+            userId,
+            interestId,
+          })),
+          skipDuplicates: true,
+        });
+      }
     });
-
-    if (validCount !== interestIds.length) {
-      throw new NotFoundException('One or more interests not found');
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.userInterest.deleteMany({
-        where: { userId },
-      }),
-      this.prisma.userInterest.createMany({
-        data: interestIds.map((interestId) => ({
-          userId,
-          interestId,
-        })),
-      }),
-    ]);
 
     return { success: true };
   }
