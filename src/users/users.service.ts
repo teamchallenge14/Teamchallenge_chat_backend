@@ -384,20 +384,18 @@ export class UsersService {
 
   // delete
   async delete(id: string): Promise<void> {
-    try {
-      await this.prisma.user.update({
-        where: { id },
-        data: {
-          accountStatus: AccountStatus.DELETED,
-        },
-      });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025') {
-          throw new NotFoundException('User not found');
-        }
-      }
-      throw e;
+    const result = await this.prisma.user.updateMany({
+      where: {
+        id,
+        accountStatus: { not: AccountStatus.DELETED },
+      },
+      data: {
+        accountStatus: AccountStatus.DELETED,
+      },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('User not found');
     }
   }
 
