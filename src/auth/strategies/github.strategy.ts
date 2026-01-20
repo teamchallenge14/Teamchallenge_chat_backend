@@ -17,7 +17,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     super({
       clientID: oauthConfig.github.clientId,
       clientSecret: oauthConfig.github.clientSecret,
-      callbackURL: `${appConfig.frontendUrl + routesV1.auth.github}/callback`,
+      callbackURL: `${appConfig.frontendUrl}/${routesV1.version}${routesV1.auth.github}/callback`,
       scope: ['user:email'],
     });
   }
