@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthProvider } from '@prisma/client';
 import { Strategy } from 'passport-google-oauth20';
-import { oauthConfig } from '@src/config';
+import { appConfig, oauthConfig } from '@src/config';
+import { routesV1 } from '@src/config/app.routes';
 
 interface GoogleProfile {
   id: string;
@@ -16,7 +17,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: oauthConfig.google.clientId,
       clientSecret: oauthConfig.google.clientSecret,
       // callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/google/callback',
-      callbackURL: 'http://localhost:5173/v1/auth/google/callback',
+      callbackURL: `${appConfig.frontendUrl + routesV1.auth.google}/callback`,
       scope: ['email', 'profile'],
     });
   }

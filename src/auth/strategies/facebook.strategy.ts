@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthProvider } from '@prisma/client';
 import { Strategy } from 'passport-facebook';
-import { oauthConfig } from '@src/config';
+import { appConfig, oauthConfig } from '@src/config';
+import { routesV1 } from '@src/config/app.routes';
 
 interface FacebookProfile {
   id: string;
@@ -15,7 +16,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     super({
       clientID: oauthConfig.facebook.appId,
       clientSecret: oauthConfig.facebook.appSecret,
-      callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/facebook/callback',
+      callbackURL: `${appConfig.frontendUrl + routesV1.auth.facebook}/callback`,
       profileFields: ['id', 'emails', 'name'],
     });
   }

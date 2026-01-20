@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthProvider } from '@prisma/client';
 import { Strategy } from 'passport-github2';
-import { oauthConfig } from '@src/config';
+import { appConfig, oauthConfig } from '@src/config';
+import { routesV1 } from '@src/config/app.routes';
 
 interface GithubProfile {
   id: string;
@@ -16,7 +17,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     super({
       clientID: oauthConfig.github.clientId,
       clientSecret: oauthConfig.github.clientSecret,
-      callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/github/callback',
+      callbackURL: `${appConfig.frontendUrl + routesV1.auth.github}/callback`,
       scope: ['user:email'],
     });
   }
