@@ -55,7 +55,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'Validation error',
   })
-  @Post(routesV1.user.root)
+  @Post(routesV1.user.create)
   create(@Body() createUserDto: CreateUserDto): Promise<CreatedUserDto> {
     return this.usersService.create(createUserDto);
   }
@@ -65,7 +65,7 @@ export class UsersController {
     summary: 'Find list of all users',
     description: 'Return list of users with pagination',
   })
-  @Get(routesV1.user.root)
+  @Get(routesV1.user.findAll)
   @ApiOkResponse({ type: PaginatedUsersDto })
   async findAll(@Query() query: PaginationQueryDto): Promise<PaginatedUsersDto> {
     return this.usersService.findAll(query);
@@ -110,7 +110,7 @@ export class UsersController {
     await this.usersService.delete(id);
   }
 
-  @Put(':id/interests')
+  @Put(routesV1.user.interest)
   @ApiOperation({ summary: 'Set user interests (replace)' })
   @ApiParam({
     name: 'id',

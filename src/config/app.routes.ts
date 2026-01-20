@@ -10,9 +10,12 @@ export const routesV1 = {
   version: v1,
   user: {
     root: usersRoot,
+    create: `/${usersRoot}`,
     delete: `/${usersRoot}/:id`,
     findOne: `/${usersRoot}/:id`,
+    findAll: `/${usersRoot}`,
     update: `/${usersRoot}/:id`,
+    interest: `/${usersRoot}/:id/interests`,
   },
   auth: {
     root: authRoot,
@@ -25,8 +28,8 @@ export const routesV1 = {
   },
   mail: {
     confirm: `/${mailRoot}/confirm`,
-    sendConfirm: `/${mailRoot}/sendConfirm`,
-    resetPasswordSend: 'reset-password/send',
-    resetPasswordConfirm: 'reset-password/confirm',
+    sendConfirm: `/${mailRoot}/confirm/send`,
+    resetPasswordSend: `/${mailRoot}/reset-password/send`,
+    resetPasswordConfirm: `/${mailRoot}/reset-password/confirm`,
   },
 };
