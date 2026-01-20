@@ -294,7 +294,7 @@ export class UsersService {
           create: {
             userId: id,
             provider: AuthProvider.LOCAL,
-            providerId: dto.email ?? dto.login ?? id, // стабільний fallback
+            providerId: dto.email ?? dto.login ?? id,
             ...authData,
           },
         });
