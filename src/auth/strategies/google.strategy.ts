@@ -15,7 +15,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: oauthConfig.google.clientId,
       clientSecret: oauthConfig.google.clientSecret,
-      callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/google/callback',
+      // callbackURL: 'https://teamchallenge-chat-backend.onrender.com/v1/auth/google/callback',
+      callbackURL: 'http://localhost:5173/v1/auth/google/callback',
       scope: ['email', 'profile'],
     });
   }
