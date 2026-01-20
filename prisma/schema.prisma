@@ -34,6 +34,7 @@ model AuthMethod {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerId])
+  @@unique([userId, provider])
 }
 
 model UserData {

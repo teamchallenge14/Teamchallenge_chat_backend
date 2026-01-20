@@ -17,6 +17,8 @@ import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-User.dto';
 import { AccountStatus, AuthProvider, Prisma } from '@prisma/client';
 import { CreatedUserDto } from '@src/users/dto/created-user.dto';
+import { pickDefined } from '@src/common/utils/pick-defined';
+import { UpdatedUserDto } from '@src/users/dto/updated-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -264,89 +266,66 @@ export class UsersService {
   }
 
   // update
-  async update(id: string, dto: UpdateUserDto): Promise<FullUserDto> {
+  async update(id: string, dto: UpdateUserDto): Promise<UpdatedUserDto> {
     return this.prisma.$transaction(async (tx) => {
+      // 1. Перевірка існування юзера
       const user = await tx.user.findUnique({
         where: { id },
-        select: {
-          id: true,
-        },
+        select: { id: true },
       });
 
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      if (dto.login || dto.email) {
+      // 2. AuthMethod (тільки LOCAL, пошук по userId + provider)
+      if (dto.login || dto.email || dto.password) {
+        const authData = pickDefined({
+          login: dto.login,
+          email: dto.email,
+          passwordHash: dto.password ? await bcrypt.hash(dto.password, 10) : undefined,
+        });
+
         await tx.authMethod.upsert({
           where: {
-            provider_providerId: {
+            userId_provider: {
+              userId: id,
               provider: AuthProvider.LOCAL,
-              providerId: dto.email ?? dto.login!,
             },
           },
-          update: {
-            login: dto.login,
-            email: dto.email,
-          },
+          update: authData,
           create: {
-            provider: AuthProvider.LOCAL,
-            providerId: dto.email ?? dto.login!,
-            login: dto.login,
-            email: dto.email,
             userId: id,
+            provider: AuthProvider.LOCAL,
+            providerId: dto.email ?? dto.login ?? id, // стабільний fallback
+            ...authData,
           },
         });
       }
 
-      if (
-        dto.firstName !== undefined ||
-        dto.lastName !== undefined ||
-        dto.description !== undefined ||
-        dto.avatar !== undefined ||
-        dto.profileTheme !== undefined ||
-        dto.age !== undefined ||
-        dto.gender !== undefined
-      ) {
+      // 3. UserData
+      const profileData = pickDefined({
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        description: dto.description,
+        avatar: dto.avatar,
+        profileTheme: dto.profileTheme,
+        age: dto.age,
+        gender: dto.gender,
+      });
+
+      if (Object.keys(profileData).length > 0) {
         await tx.userData.upsert({
           where: { userId: id },
-          update: {
-            firstName: dto.firstName,
-            lastName: dto.lastName,
-            description: dto.description,
-            avatar: dto.avatar,
-            profileTheme: dto.profileTheme,
-            age: dto.age,
-            gender: dto.gender,
-          },
+          update: profileData,
           create: {
             userId: id,
-            firstName: dto.firstName,
-            lastName: dto.lastName,
-            description: dto.description,
-            avatar: dto.avatar,
-            profileTheme: dto.profileTheme,
-            age: dto.age,
-            gender: dto.gender,
+            ...profileData,
           },
         });
       }
 
-      if (dto.interestIds) {
-        await tx.userInterest.deleteMany({
-          where: { userId: id },
-        });
-
-        if (dto.interestIds.length > 0) {
-          await tx.userInterest.createMany({
-            data: dto.interestIds.map((interestId) => ({
-              userId: id,
-              interestId,
-            })),
-          });
-        }
-      }
-
+      // 4. Повертаємо мінімально достатню сутність
       const updatedUser = await tx.user.findUnique({
         where: { id },
         select: {
@@ -355,9 +334,7 @@ export class UsersService {
           createdAt: true,
 
           authMethods: {
-            where: {
-              provider: AuthProvider.LOCAL,
-            },
+            where: { provider: AuthProvider.LOCAL },
             take: 1,
             select: {
               email: true,
@@ -376,18 +353,6 @@ export class UsersService {
               gender: true,
             },
           },
-
-          userInterests: {
-            select: {
-              interest: {
-                select: {
-                  id: true,
-                  name: true,
-                  category: true,
-                },
-              },
-            },
-          },
         },
       });
 
@@ -399,8 +364,10 @@ export class UsersService {
 
       return {
         id: updatedUser.id,
+
         email: localAuth?.email ?? undefined,
         login: localAuth?.login ?? undefined,
+
         accountStatus: updatedUser.accountStatus,
         createdAt: updatedUser.createdAt,
 
@@ -411,8 +378,6 @@ export class UsersService {
         profileTheme: updatedUser.data?.profileTheme ?? undefined,
         age: updatedUser.data?.age ?? undefined,
         gender: updatedUser.data?.gender ?? undefined,
-
-        interests: updatedUser.userInterests.map((ui) => ui.interest),
       };
     });
   }

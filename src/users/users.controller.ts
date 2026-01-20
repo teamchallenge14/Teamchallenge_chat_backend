@@ -32,6 +32,7 @@ import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-User.dto';
 import { SetUserInterestsDto } from './dto/set-user-interests.dto';
 import { CreatedUserDto } from '@src/users/dto/created-user.dto';
+import { UpdatedUserDto } from '@src/users/dto/updated-user.dto';
 
 @ApiTags(routesV1.user.root)
 @Controller(routesV1.version)
@@ -91,7 +92,7 @@ export class UsersController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
-  ): Promise<FullUserDto> {
+  ): Promise<UpdatedUserDto> {
     return this.usersService.update(id, dto);
   }
 
