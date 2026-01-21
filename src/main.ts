@@ -24,7 +24,7 @@ async function bootstrap() {
   const logger = app.get(Logger);
   app.useLogger(logger);
 
-  // SENTRY INIT (до filters)
+  // SENTRY INIT
   initSentry();
 
   // GLOBAL INTERCEPTORS
@@ -39,13 +39,10 @@ async function bootstrap() {
     }),
   );
 
-  // GLOBAL FILTERS (ВАЖЛИВО: порядок)
-  app.useGlobalFilters(
-    new SentryExceptionFilter(),
-    new HttpExceptionFilter(), // ← ОСТАННІЙ
-  );
+  // GLOBAL FILTERS
+  app.useGlobalFilters(new SentryExceptionFilter(), new HttpExceptionFilter());
 
-  // EXPRESS MIDDLEWARE (ПІСЛЯ filters)
+  // EXPRESS MIDDLEWARE
   app.use(cookieParser());
 
   // CORS
@@ -54,7 +51,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // MORGAN (логування — ОК бути тут)
+  // MORGAN
   const accessLogStream = createLogStream(loggerConfig.dir, loggerConfig.morgan.accessLog);
 
   const errorLogStream = createLogStream(loggerConfig.dir, loggerConfig.morgan.errorLog);
@@ -72,7 +69,7 @@ async function bootstrap() {
     }),
   );
 
-  // SWAGGER — ТІЛЬКИ ОДИН РАЗ
+  // SWAGGER
   const swaggerConfig = new DocumentBuilder()
     .setTitle('TeamChallengeChatApi')
     .setDescription('API for TeamChallengeChat')
