@@ -13,24 +13,24 @@ import { createLogStream } from './logger/log-stream';
 
 import './config';
 import { appConfig, corsConfig, loggerConfig } from './config';
+import { HttpExceptionFilter } from '@src/common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
 
-  // const env = config.getOrThrow<string>('NODE_ENV');
-  // const port = config.getOrThrow<number>('PORT');
-  // const swaggerPath = config.getOrThrow<string>('SWAGGER_PATH');
-  // const corsOrigins = config.getOrThrow<string>('CORS_ORIGINS').split(',');
-  // const logDir = config.getOrThrow<string>('LOG_DIR');
+  // LOGGER
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
-  // // SENTRY
+  // SENTRY INIT (до filters)
   initSentry();
 
-  // GLOBALS
+  // GLOBAL INTERCEPTORS
   app.useGlobalInterceptors(new RequestIdInterceptor());
-  app.useGlobalFilters(new SentryExceptionFilter());
+
+  // GLOBAL PIPES
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -39,6 +39,13 @@ async function bootstrap() {
     }),
   );
 
+  // GLOBAL FILTERS (ВАЖЛИВО: порядок)
+  app.useGlobalFilters(
+    new SentryExceptionFilter(),
+    new HttpExceptionFilter(), // ← ОСТАННІЙ
+  );
+
+  // EXPRESS MIDDLEWARE (ПІСЛЯ filters)
   app.use(cookieParser());
 
   // CORS
@@ -47,44 +54,25 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // logs
-  // pino
-
-  const logger = app.get(Logger);
-  app.useLogger(logger);
-
-  // MORGAN
+  // MORGAN (логування — ОК бути тут)
   const accessLogStream = createLogStream(loggerConfig.dir, loggerConfig.morgan.accessLog);
 
   const errorLogStream = createLogStream(loggerConfig.dir, loggerConfig.morgan.errorLog);
 
-  if (appConfig.nodeEnv) {
-    // access log
-    app.use(
-      morgan('dev', {
-        stream: accessLogStream,
-      }),
-    );
+  app.use(
+    morgan('dev', {
+      stream: accessLogStream,
+    }),
+  );
 
-    // morgan error log
-    app.use(
-      morgan('dev', {
-        skip: (_, res) => res.statusCode < 500,
-        stream: errorLogStream,
-      }),
-    );
-  } else {
-    // morgan prod
-    app.use(
-      morgan('combined', {
-        skip: (_, res) => res.statusCode < 500,
-        stream: errorLogStream,
-      }),
-    );
-  }
+  app.use(
+    morgan('dev', {
+      skip: (_, res) => res.statusCode < 500,
+      stream: errorLogStream,
+    }),
+  );
 
-  // SWAGGER
-
+  // SWAGGER — ТІЛЬКИ ОДИН РАЗ
   const swaggerConfig = new DocumentBuilder()
     .setTitle('TeamChallengeChatApi')
     .setDescription('API for TeamChallengeChat')
@@ -93,7 +81,15 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup(appConfig.swaggerPath, app, document);
+
+  SwaggerModule.setup(appConfig.swaggerPath, app, document, {
+    swaggerOptions: {
+      requestInterceptor: (req) => {
+        req.headers['accept'] = 'application/json';
+        return req;
+      },
+    },
+  });
 
   await app.listen(appConfig.port);
 

@@ -14,6 +14,7 @@ import { CreateUserDto } from '@src/users/dto/create-user.dto';
 import type { Response, Request } from 'express';
 import { AuthProvider } from '@prisma/client';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -27,6 +28,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { LoginDto } from './dto/login.dto';
 import { appConfig } from '@src/config';
 import { CreatedUserDto } from '@src/users/dto/created-user.dto';
+import { AuthMeDto } from '@src/auth/dto/auth-me.dto';
+import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 
 @ApiTags(routesV1.auth.root)
 @Controller(routesV1.version)
@@ -229,11 +232,32 @@ export class AuthController {
     res.redirect(appConfig.frontendUrl);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get(routesV1.auth.me)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get current authenticated user',
+    description:
+      'Returns minimal authentication context based on access token. ' +
+      'Does not access database.',
+  })
+  @ApiOkResponse({
+    description: 'User is authenticated',
+    type: AuthMeDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing access token',
+  })
+  me(@Req() req): AuthMeDto {
+    return {
+      id: req.user.id,
+    };
+  }
   // =========================
   // HELPERS
   // =========================
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
-    const isProd = appConfig.nodeEnv === 'production';
+    // const isProd = appConfig.nodeEnv === 'production';
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,

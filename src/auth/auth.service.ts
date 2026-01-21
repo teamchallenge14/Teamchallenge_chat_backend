@@ -133,6 +133,7 @@ export class AuthService {
     return auth.user;
   }
 
+  // helpers
   async issueTokens(payload: { id: string; identifier: string }, res: Response) {
     if (!payload.identifier) {
       payload.identifier = 'true';
