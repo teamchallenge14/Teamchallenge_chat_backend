@@ -65,7 +65,7 @@ export class AuthController {
   // =========================
   // REFRESH TOKEN
   // =========================
-  @Post('refresh')
+  @Post(routesV1.auth.refresh)
   @ApiOperation({
     summary: 'Refresh access token',
     description: 'Issues a new access token using a valid refresh token from cookies.',

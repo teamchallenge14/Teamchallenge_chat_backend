@@ -20,6 +20,7 @@ export const routesV1 = {
   auth: {
     root: authRoot,
     me: `/${authRoot}/me`,
+    refresh: `/${authRoot}/refresh`,
     delete: `/${authRoot}/:id`,
     findOne: `/${authRoot}/:id`,
     update: `/${authRoot}/:id`,
