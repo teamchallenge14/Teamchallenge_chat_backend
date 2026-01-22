@@ -1,0 +1,61 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+      - prod
+      - test
+      - test1
+      - test2
+      - test3
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            /home/qtalk/scripts/deploy.sh --${{ github.ref_name }}
+
+      - name: Health check
+        env:
+          BASE_DOMAIN: ${{ secrets.BASE_DOMAIN }}
+        run: |
+          set -e
+
+          BRANCH="${{ github.ref_name }}"
+
+          case "$BRANCH" in
+            main)
+              HOST="api.${BASE_DOMAIN}"
+              ;;
+            *)
+              HOST="${BRANCH}-api.${BASE_DOMAIN}"
+              ;;
+          esac
+
+          URL="https://${HOST}/health"
+
+          echo "Health check URL: $URL"
+
+          for i in {1..20}; do
+            if curl -fsS "$URL"; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+
+            echo "⏳ Waiting for app... attempt $i"
+            sleep 5
+          done
+
+          echo "❌ Health check failed after deploy"
+          exit 1
