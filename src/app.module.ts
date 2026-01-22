@@ -11,6 +11,7 @@ import { MailModule } from './mail/mail.module';
 import { PrismaModule } from '@db/prisma.module';
 import { PinoLoggerModule } from './logger/pino.module';
 import { dbConfig } from './config';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { dbConfig } from './config';
     AuthModule,
     InterestModule,
     MailModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

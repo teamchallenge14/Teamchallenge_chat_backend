@@ -233,8 +233,6 @@ export class AuthController {
   // HELPERS
   // =========================
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
-    const isProd = appConfig.nodeEnv === 'production';
-
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: false,
