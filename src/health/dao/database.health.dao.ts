@@ -10,11 +10,17 @@ export class DatabaseHealthDao {
     const start = Date.now();
 
     try {
+      let timeoutId: NodeJS.Timeout | undefined;
       await Promise.race([
         this.prisma.$queryRaw`SELECT 1`,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
+        new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('timeout')), timeoutMs);
+        }),
       ]);
 
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       return {
         status: 'healthy',
         latencyMs: Date.now() - start,
