@@ -22,13 +22,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { PublicUserDto } from '@src/modules/users/dto/public-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginDto } from './dto/login.dto';
 import { appConfig } from '@src/config';
 import { AuthCookiesService } from '@src/modules/auth/cookies/auth-cookies.service';
 import { RegisterUserResponseDto } from '@src/modules/auth/dto/register-user.response.dto';
 import { RefreshResponseDto } from '@src/modules/auth/dto/refresh.response.dto';
+import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 
 @ApiTags(routesV1.auth.root)
 @Controller(routesV1.version)
@@ -110,15 +110,38 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({
     description: 'Successfully authenticated',
-    type: PublicUserDto,
+    type: RegisterUserResponseDto,
   })
   @ApiUnauthorizedResponse({
     description: 'Invalid login or password',
   })
-  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const user = req.user as { id: string; identifier: string };
-    await this.authService.issueTokens(user, res);
-    return user;
+  async login(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<RegisterUserResponseDto> {
+    const user = req.user as CreatedUserDto | undefined;
+
+    if (!user || (!user.email && !user.login)) {
+      throw new UnauthorizedException();
+    }
+
+    const identifier = user.email ?? user.login;
+    if (!identifier) {
+      throw new UnauthorizedException();
+    }
+
+    const accessToken = await this.authService.issueTokens(
+      {
+        id: user.id,
+        identifier,
+      },
+      res,
+    );
+
+    return {
+      user,
+      accessToken,
+    };
   }
 
   // =========================

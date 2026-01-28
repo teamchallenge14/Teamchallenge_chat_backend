@@ -98,7 +98,15 @@ export class AuthService {
       return null;
     }
 
-    return authMethod.user;
+    const user = {
+      id: authMethod.id,
+      login: authMethod.login,
+      email: authMethod.email,
+      provider: authMethod.provider,
+      createdAt: authMethod.createdAt,
+    };
+
+    return user;
   }
 
   // SOCIAL (Google / GitHub / Facebook)
@@ -152,8 +160,6 @@ export class AuthService {
       refreshToken,
     });
 
-    return {
-      accessToken,
-    };
+    return accessToken;
   }
 }
