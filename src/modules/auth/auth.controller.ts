@@ -26,7 +26,6 @@ import { PublicUserDto } from '@src/modules/users/dto/public-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginDto } from './dto/login.dto';
 import { appConfig } from '@src/config';
-import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 import { AuthCookiesService } from '@src/modules/auth/cookies/auth-cookies.service';
 import { RegisterUserResponseDto } from '@src/modules/auth/dto/register-user.response.dto';
 import { RefreshResponseDto } from '@src/modules/auth/dto/refresh.response.dto';
@@ -51,7 +50,7 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({
     description: 'User successfully registered',
-    type: CreatedUserDto,
+    type: RegisterUserResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Registration failed' })
   @ApiCookieAuth('access_token')
@@ -76,7 +75,7 @@ export class AuthController {
   @ApiCookieAuth('refresh_token')
   @ApiOkResponse({
     description: 'Tokens refreshed successfully',
-    type: RegisterUserResponseDto,
+    type: RefreshResponseDto,
   })
   @ApiUnauthorizedResponse({
     description: 'Invalid or missing refresh token',
