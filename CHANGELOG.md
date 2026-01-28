@@ -19,7 +19,7 @@ and this project adheres to Semantic Versioning.
 
 - Bearer token verification for authenticated requests
 - Access token is now returned in the response body for `POST /auth/refresh`
-- Access token is now returned in the response body for `POST /auth/register`
+- Access token is now returned in the response body for `POST /auth/`
 
 ### Changed
 
