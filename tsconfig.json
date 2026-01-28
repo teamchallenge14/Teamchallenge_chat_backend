@@ -23,8 +23,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@src/*": ["src/*"],
-      "@users/*": ["src/users/*"],
-      "@auth/*": ["src/auth/*"],
+      "@users/*": ["src/modules/users/*"],
+      "@auth/*": ["src/modules/auth/*"],
       "@config/*": ["src/config/*"],
       "@common/*": ["src/common/*"],
       "@db/*": ["prisma/*"]
