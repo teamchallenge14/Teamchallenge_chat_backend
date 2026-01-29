@@ -18,6 +18,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { routesV1 } from '@src/config/app/app.routes';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -40,6 +41,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // create
+
+  @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new user',
@@ -72,6 +75,7 @@ export class UsersController {
   }
 
   // find one
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Get full user info',
     description: 'return all public user info',
@@ -83,6 +87,7 @@ export class UsersController {
   }
 
   // update
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Update user',
     description: 'can update any field of user',
@@ -97,6 +102,7 @@ export class UsersController {
   }
 
   // delete
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Delete user',
     description: 'Delete a user and returns void',
@@ -110,6 +116,8 @@ export class UsersController {
     await this.usersService.delete(id);
   }
 
+  // set interests
+  @ApiBearerAuth('access-token')
   @Put(routesV1.user.interest)
   @ApiOperation({ summary: 'Set user interests (replace)' })
   @ApiParam({

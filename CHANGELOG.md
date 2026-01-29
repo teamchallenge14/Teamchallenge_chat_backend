@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.9] - 2026-01-29
+
+### Changed
+
+- `/interests` updated paths ,add /v1/ prefix
+
+### Added
+
+- `global` added Api Bearer to docs (where needed)
+
+- `errors` added global error pattern like
+  {
+  "statusCode": 400,
+  "error": "BadRequestException",
+  "message": "Validation failed (uuid is expected)",
+  "path": "/v1/users/sd",
+  "timestamp": "2026-01-29T10:48:25.213Z"
+  }
+
 ## [0.0.8] - 2026-01-28
 
 ### Changed

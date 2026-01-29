@@ -53,7 +53,6 @@ export class AuthController {
     type: RegisterUserResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Registration failed' })
-  @ApiCookieAuth('access_token')
   async register(
     @Body() dto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
@@ -68,11 +67,11 @@ export class AuthController {
   // REFRESH TOKEN
   // =========================
   @Post('refresh')
+  @ApiCookieAuth('refresh-token')
   @ApiOperation({
     summary: 'Refresh access token',
     description: 'Issues a new access token using a valid refresh token from cookies.',
   })
-  @ApiCookieAuth('refresh_token')
   @ApiOkResponse({
     description: 'Tokens refreshed successfully',
     type: RefreshResponseDto,

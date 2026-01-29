@@ -7,13 +7,13 @@ import morgan from 'morgan';
 
 import { initSentry } from './infra/sentry/sentry.config';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
-import { SentryExceptionFilter } from './infra/sentry/sentry.filter';
 import { Logger } from 'nestjs-pino';
 import { createLogStream } from './infra/logger/log-stream';
 
 import './config';
 import { appConfig, corsConfig, loggerConfig } from './config';
 import { buildSwaggerConfig } from '@src/infra/swagger/swagger.config';
+import { GlobalExceptionFilter } from '@src/common/filters/global-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -25,7 +25,8 @@ async function bootstrap() {
 
   // GLOBALS
   app.useGlobalInterceptors(new RequestIdInterceptor());
-  app.useGlobalFilters(new SentryExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  // app.useGlobalFilters(new SentryExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
