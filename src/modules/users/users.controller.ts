@@ -19,6 +19,7 @@ import { routesV1 } from '@src/config/app/app.routes';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -30,10 +31,15 @@ import {
 import { PaginationQueryDto } from '@src/common/dto/pagination-query.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
-import { FullUserDto } from './dto/full-User.dto';
+import { FullUserDto } from './dto/full-user.dto';
 import { SetUserInterestsDto } from './dto/set-user-interests.dto';
 import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 import { UpdatedUserDto } from '@src/modules/users/dto/updated-user.dto';
+import { UserInterestDto } from '@src/modules/users/dto/user-interest.dto';
+import {
+  AddUserInterestResponseDto,
+  DeleteUserInterestResponseDto,
+} from '@src/modules/users/dto/user-interest.response.dto';
 
 @ApiTags(routesV1.user.root)
 @Controller(routesV1.version)
@@ -105,15 +111,24 @@ export class UsersController {
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Delete user',
-    description: 'Delete a user and returns void',
+    description: 'Delete a user',
   })
   @Delete(routesV1.user.delete)
   @ApiOkResponse({
     description: 'User successfully deleted',
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+          example: true,
+        },
+      },
+    },
   })
   @ApiNotFoundResponse({ description: 'User not found' })
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    await this.usersService.delete(id);
+  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<{ success: boolean }> {
+    return await this.usersService.delete(id);
   }
 
   // set interests
@@ -130,5 +145,53 @@ export class UsersController {
     @Body() dto: SetUserInterestsDto,
   ) {
     return this.usersService.setUserInterests(userId, dto.interestIds);
+  }
+
+  // Add interests
+  @Post(routesV1.user.interestAdd)
+  @ApiOperation({
+    summary: 'Add interests to user',
+    description: 'Adds one or more interests to a user without removing existing ones',
+  })
+  @ApiParam({
+    name: 'userId',
+    type: String,
+    format: 'uuid',
+    description: 'User ID',
+  })
+  @ApiBody({ type: UserInterestDto })
+  @ApiOkResponse({
+    description: 'Interests successfully added',
+    type: AddUserInterestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User or one of interests not found',
+  })
+  addInterests(@Param('userId') userId: string, @Body() dto: UserInterestDto) {
+    return this.usersService.addUserInterests(userId, dto.interestIds);
+  }
+
+  // Delete interests
+  @Delete(routesV1.user.interestDelete)
+  @ApiOperation({
+    summary: 'Remove interests from user',
+    description: 'Removes specific interests from a user without affecting others',
+  })
+  @ApiParam({
+    name: 'userId',
+    type: String,
+    format: 'uuid',
+    description: 'User ID',
+  })
+  @ApiBody({ type: UserInterestDto })
+  @ApiOkResponse({
+    description: 'Interests successfully removed',
+    type: DeleteUserInterestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
+  deleteInterests(@Param('userId') userId: string, @Body() dto: UserInterestDto) {
+    return this.usersService.removeUserInterests(userId, dto.interestIds);
   }
 }
