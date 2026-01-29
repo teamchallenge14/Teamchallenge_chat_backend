@@ -1,30 +1,21 @@
-import * as Joi from 'joi';
-import { validateEnv } from '../_env-validator';
-
-const schema = Joi.object({
-  GOOGLE_CLIENT_ID: Joi.string().required(),
-  GOOGLE_CLIENT_SECRET: Joi.string().required(),
-
-  GITHUB_CLIENT_ID: Joi.string().required(),
-  GITHUB_CLIENT_SECRET: Joi.string().required(),
-
-  FACEBOOK_APP_ID: Joi.string().required(),
-  FACEBOOK_APP_SECRET: Joi.string().required(),
-}).unknown(true);
-
-const env = validateEnv(schema, 'oauth');
+import { get } from 'env-var';
 
 export const oauthConfig = {
   google: {
-    clientId: env.GOOGLE_CLIENT_ID as string,
-    clientSecret: env.GOOGLE_CLIENT_SECRET as string,
+    clientId: get('GOOGLE_CLIENT_ID').required().asString(),
+
+    clientSecret: get('GOOGLE_CLIENT_SECRET').required().asString(),
   },
+
   github: {
-    clientId: env.GITHUB_CLIENT_ID as string,
-    clientSecret: env.GITHUB_CLIENT_SECRET as string,
+    clientId: get('GITHUB_CLIENT_ID').required().asString(),
+
+    clientSecret: get('GITHUB_CLIENT_SECRET').required().asString(),
   },
+
   facebook: {
-    appId: env.FACEBOOK_APP_ID as string,
-    appSecret: env.FACEBOOK_APP_SECRET as string,
+    appId: get('FACEBOOK_APP_ID').required().asString(),
+
+    appSecret: get('FACEBOOK_APP_SECRET').required().asString(),
   },
 } as const;

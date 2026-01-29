@@ -1,30 +1,17 @@
-import * as Joi from 'joi';
-import { validateEnv } from '../_env-validator';
-
-const schema = Joi.object({
-  LOG_DIR: Joi.string().default('logs'),
-
-  // Morgan
-  MORGAN_ACCESS_LOG: Joi.string().default('access.log'),
-  MORGAN_ERROR_LOG: Joi.string().default('error.log'),
-
-  // Pino
-  PINO_LOG_LEVEL: Joi.string()
-    .valid('fatal', 'error', 'warn', 'info', 'debug', 'trace')
-    .default('info'),
-}).unknown(true);
-
-const env = validateEnv(schema, 'logger');
+import { get } from 'env-var';
 
 export const loggerConfig = {
-  dir: env.LOG_DIR,
+  dir: get('LOG_DIR').default('logs').asString(),
 
   morgan: {
-    accessLog: env.MORGAN_ACCESS_LOG,
-    errorLog: env.MORGAN_ERROR_LOG,
+    accessLog: get('MORGAN_ACCESS_LOG').default('access.log').asString(),
+
+    errorLog: get('MORGAN_ERROR_LOG').default('error.log').asString(),
   },
 
   pino: {
-    level: env.PINO_LOG_LEVEL,
+    level: get('PINO_LOG_LEVEL')
+      .default('info')
+      .asEnum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']),
   },
 } as const;

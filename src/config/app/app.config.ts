@@ -1,18 +1,11 @@
-import * as Joi from 'joi';
-import { validateEnv } from '../_env-validator';
-
-const schema = Joi.object({
-  NODE_ENV: Joi.string().valid('development', 'production', 'test').required(),
-  PORT: Joi.number().required(),
-  SWAGGER_PATH: Joi.string().default('/api'),
-  FRONTEND_URL: Joi.string().uri().required(),
-}).unknown(true);
-
-const env = validateEnv(schema, 'app');
+import { get } from 'env-var';
 
 export const appConfig = {
-  nodeEnv: env.NODE_ENV as 'development' | 'production' | 'test',
-  port: env.PORT as number,
-  swaggerPath: env.SWAGGER_PATH as string,
-  frontendUrl: env.FRONTEND_URL as string,
+  nodeEnv: get('NODE_ENV').required().asEnum(['development', 'production', 'test']),
+
+  port: get('PORT').required().asPortNumber(),
+
+  swaggerPath: get('SWAGGER_PATH').default('/api').asString(),
+
+  frontendUrl: get('FRONTEND_URL').required().asUrlString(),
 } as const;

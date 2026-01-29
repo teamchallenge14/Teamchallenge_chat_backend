@@ -1,19 +1,11 @@
-import * as Joi from 'joi';
-import { validateEnv } from '../_env-validator';
-
-const schema = Joi.object({
-  POSTGRES_DATABASE_URL: Joi.string().uri().required(),
-  MONGO_DATABASE_URL: Joi.string().uri().required(),
-}).unknown(true);
-
-const env = validateEnv(schema, 'db');
+import { get } from 'env-var';
 
 export const dbConfig = {
   postgres: {
-    url: env.POSTGRES_DATABASE_URL as string,
+    url: get('POSTGRES_DATABASE_URL').required().asUrlString(),
   },
 
   mongo: {
-    url: env.MONGO_DATABASE_URL as string,
+    url: get('MONGO_DATABASE_URL').required().asUrlString(),
   },
 } as const;
