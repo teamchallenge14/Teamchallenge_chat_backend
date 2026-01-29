@@ -93,7 +93,7 @@ export class UsersController {
     description: 'can update any field of user',
   })
   @Patch(routesV1.user.update)
-  @ApiOkResponse({ type: FullUserDto })
+  @ApiOkResponse({ type: UpdatedUserDto })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
