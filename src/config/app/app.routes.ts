@@ -31,7 +31,7 @@ export const routesV1 = {
   },
   interests: {
     root: interestsRoot,
-    crate: `/${interestsRoot}`,
+    create: `/${interestsRoot}`,
     findAll: `/${interestsRoot}`,
     delete: `/${interestsRoot}/:id`,
     findOne: `/${interestsRoot}/:id`,
