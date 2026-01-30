@@ -55,7 +55,7 @@ async function bootstrap() {
 
   const errorLogStream = createLogStream(loggerConfig.dir, loggerConfig.morgan.errorLog);
 
-  if (appConfig.nodeEnv) {
+  if (appConfig.nodeEnv !== 'production') {
     // access log
     app.use(
       morgan('dev', {
