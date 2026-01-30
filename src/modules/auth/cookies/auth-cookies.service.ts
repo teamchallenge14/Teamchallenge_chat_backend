@@ -22,7 +22,7 @@ export class AuthCookiesService {
       secure: cookiesConfig.secure,
       sameSite: cookiesConfig.sameSite,
       maxAge: cookiesConfig.refreshMaxAge,
-      path: routesV1.auth.root + '/refresh',
+      path: routesV1.auth.refresh,
     });
   }
 
