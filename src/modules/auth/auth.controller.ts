@@ -29,6 +29,7 @@ import { AuthCookiesService } from '@src/modules/auth/cookies/auth-cookies.servi
 import { RegisterUserResponseDto } from '@src/modules/auth/dto/register-user.response.dto';
 import { RefreshResponseDto } from '@src/modules/auth/dto/refresh.response.dto';
 import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
+import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 
 @ApiTags(routesV1.auth.root)
 @Controller(routesV1.version)
@@ -67,7 +68,7 @@ export class AuthController {
   // REFRESH TOKEN
   // =========================
   @Post('refresh')
-  @ApiCookieAuth('refresh-token')
+  @ApiCookieAuth(AUTH_COOKIES.REFRESH_TOKEN)
   @ApiOperation({
     summary: 'Refresh access token',
     description: 'Issues a new access token using a valid refresh token from cookies.',

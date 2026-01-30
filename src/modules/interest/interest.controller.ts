@@ -16,6 +16,7 @@ import { UpdateInterestDto } from './dto/update-interest.dto';
 import { InterestCategory } from '@prisma/client';
 import { InterestService } from './interest.service';
 import { routesV1 } from '@src/config';
+import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 
 @ApiTags(routesV1.interests.root)
 @Controller(routesV1.version)
@@ -23,14 +24,14 @@ export class InterestController {
   constructor(private readonly interestsService: InterestService) {}
 
   @Post(routesV1.interests.create)
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @ApiOperation({ summary: 'Create interest' })
   create(@Body() dto: CreateInterestDto) {
     return this.interestsService.create(dto);
   }
 
   @Get(routesV1.interests.findAll)
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @ApiOperation({ summary: 'Get all interests' })
   @ApiQuery({ name: 'category', enum: InterestCategory, required: false })
   findAll(@Query('category') category?: InterestCategory) {

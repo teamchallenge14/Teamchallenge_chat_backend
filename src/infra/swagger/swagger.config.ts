@@ -1,5 +1,6 @@
 import { DocumentBuilder } from '@nestjs/swagger';
 import { ChangelogService } from '../../common/changelog/changelog.service';
+import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 
 export function buildSwaggerConfig() {
   const changelog = new ChangelogService().getForSwagger();
@@ -21,7 +22,7 @@ ${changelog}
         bearerFormat: 'JWT',
         description: 'Paste access token here',
       },
-      'access-token',
+      AUTH_COOKIES.ACCESS_TOKEN,
     )
     .addBearerAuth(
       {
@@ -30,7 +31,7 @@ ${changelog}
         bearerFormat: 'JWT',
         description: 'Paste access token here',
       },
-      'refresh-token',
+      AUTH_COOKIES.REFRESH_TOKEN,
     )
     .build();
 }

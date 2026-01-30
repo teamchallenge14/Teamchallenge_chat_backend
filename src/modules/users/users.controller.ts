@@ -40,6 +40,7 @@ import {
   AddUserInterestResponseDto,
   DeleteUserInterestResponseDto,
 } from '@src/modules/users/dto/user-interest.response.dto';
+import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 
 @ApiTags(routesV1.user.root)
 @Controller(routesV1.version)
@@ -48,7 +49,7 @@ export class UsersController {
 
   // create
 
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new user',
@@ -81,7 +82,7 @@ export class UsersController {
   }
 
   // find one
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @ApiOperation({
     summary: 'Get full user info',
     description: 'return all public user info',
@@ -93,7 +94,7 @@ export class UsersController {
   }
 
   // update
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @ApiOperation({
     summary: 'Update user',
     description: 'can update any field of user',
@@ -108,7 +109,7 @@ export class UsersController {
   }
 
   // delete
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @ApiOperation({
     summary: 'Delete user',
     description: 'Delete a user',
@@ -132,7 +133,7 @@ export class UsersController {
   }
 
   // set interests
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
   @Put(routesV1.user.interest)
   @ApiOperation({ summary: 'Set user interests (replace)' })
   @ApiParam({
