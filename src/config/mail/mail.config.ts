@@ -1,20 +1,9 @@
-import * as Joi from 'joi';
-import { validateEnv } from '../_env-validator';
-
-const schema = Joi.object({
-  MAIL_HOST: Joi.string().required(),
-  MAIL_PORT: Joi.number().required(),
-  MAIL_USER: Joi.string().required(),
-  MAIL_PASS: Joi.string().required(),
-  MAIL_FROM: Joi.string().required(),
-}).unknown(true);
-
-const env = validateEnv(schema, 'mail');
+import { get } from 'env-var';
 
 export const mailConfig = {
-  host: env.MAIL_HOST as string,
-  port: env.MAIL_PORT as number,
-  user: env.MAIL_USER as string,
-  pass: env.MAIL_PASS as string,
-  from: env.MAIL_FROM as string,
+  host: get('MAIL_HOST').required().asString(),
+  port: get('MAIL_PORT').required().asPortNumber(),
+  user: get('MAIL_USER').required().asString(),
+  pass: get('MAIL_PASS').required().asString(),
+  from: get('MAIL_FROM').required().asString(),
 } as const;
