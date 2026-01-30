@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AccountStatus, AuthProvider, Gender } from '@prisma/client';
-import { InterestDto } from '@src/modules/interest/dto/interest.dto';
+import { InterestDto } from '@src/modules/interests/dto/interest.dto';
 import { IsNumber, IsOptional, IsUUID } from 'class-validator';
 
 export class FullUserDto {

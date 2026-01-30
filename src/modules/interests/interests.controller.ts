@@ -11,17 +11,17 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 
-import { CreateInterestDto } from './dto/create-interest.dto';
-import { UpdateInterestDto } from './dto/update-interest.dto';
+import { CreateInterestDto } from './dto/create-interests.dto';
+import { UpdateInterestDto } from './dto/update-interests.dto';
 import { InterestCategory } from '@prisma/client';
-import { InterestService } from './interest.service';
+import { InterestsService } from './interests.service';
 import { routesV1 } from '@src/config';
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 
 @ApiTags(routesV1.interests.root)
 @Controller(routesV1.version)
-export class InterestController {
-  constructor(private readonly interestsService: InterestService) {}
+export class InterestsController {
+  constructor(private readonly interestsService: InterestsService) {}
 
   @Post(routesV1.interests.create)
   @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)

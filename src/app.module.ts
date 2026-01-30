@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { InterestModule } from './modules/interest/interest.module';
+import { InterestsModule } from './modules/interests/interests.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from '@db/prisma.module';
 import { PinoLoggerModule } from './infra/logger/pino.module';
@@ -26,7 +26,7 @@ import { HealthModule } from './modules/health/health.module';
     // FEATURES
     UsersModule,
     AuthModule,
-    InterestModule,
+    InterestsModule,
     MailModule,
     HealthModule,
   ],

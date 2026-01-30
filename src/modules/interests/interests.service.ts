@@ -1,12 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
-import { CreateInterestDto } from './dto/create-interest.dto';
-import { UpdateInterestDto } from './dto/update-interest.dto';
+import { CreateInterestDto } from './dto/create-interests.dto';
+import { UpdateInterestDto } from './dto/update-interests.dto';
 import { InterestCategory, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
-export class InterestService {
+export class InterestsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateInterestDto) {
