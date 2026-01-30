@@ -9,7 +9,6 @@ import {
   HttpCode,
   HttpStatus,
   Query,
-  Put,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -19,28 +18,24 @@ import { routesV1 } from '@src/config/app/app.routes';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { PaginationQueryDto } from '@src/common/dto/pagination-query.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { FindOneUserQueryDto } from './dto/find-one-user.query.dto';
 import { FullUserDto } from './dto/full-user.dto';
-import { SetUserInterestsDto } from './dto/set-user-interests.dto';
 import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 import { UpdatedUserDto } from '@src/modules/users/dto/updated-user.dto';
-import { UserInterestDto } from '@src/modules/users/dto/user-interest.dto';
-import {
-  AddUserInterestResponseDto,
-  DeleteUserInterestResponseDto,
-} from '@src/modules/users/dto/user-interest.response.dto';
+
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
+import { UpdateUserInterestsDto } from '@src/modules/users/dto/update-user-interests.dto';
 
 @ApiTags(routesV1.user.root)
 @Controller(routesV1.version)
@@ -133,66 +128,33 @@ export class UsersController {
   }
 
   // set interests
+
+  @Patch(routesV1.user.interest)
   @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
-  @Put(routesV1.user.interest)
-  @ApiOperation({ summary: 'Set user interests (replace)' })
+  @ApiOperation({
+    summary: 'Add and/or remove user interests',
+    description: 'Allows adding and removing user interests in a single request',
+  })
   @ApiParam({
     name: 'id',
-    example: 'a3f1e1a0-3b0c-4c9f-8f5a-3c6b1f7d9e21',
-    description: 'User UUID',
-  })
-  setUserInterests(
-    @Param('id', new ParseUUIDPipe()) userId: string,
-    @Body() dto: SetUserInterestsDto,
-  ) {
-    return this.usersService.setUserInterests(userId, dto.interestIds);
-  }
-
-  // Add interests
-  @Post(routesV1.user.interestAdd)
-  @ApiOperation({
-    summary: 'Add interests to user',
-    description: 'Adds one or more interests to a user without removing existing ones',
-  })
-  @ApiParam({
-    name: 'userId',
-    type: String,
-    format: 'uuid',
     description: 'User ID',
+    example: 'e9c9c4b5-1d23-4f5a-9b8e-abcdef123456',
   })
-  @ApiBody({ type: UserInterestDto })
-  @ApiOkResponse({
-    description: 'Interests successfully added',
-    type: AddUserInterestResponseDto,
+  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
+  @ApiResponse({
+    status: 200,
+    description: 'User interests updated successfully',
+    schema: {
+      example: {
+        success: true,
+      },
+    },
   })
-  @ApiNotFoundResponse({
-    description: 'User or one of interests not found',
+  @ApiResponse({
+    status: 404,
+    description: 'User not found or one or more interests not found',
   })
-  addInterests(@Param('userId') userId: string, @Body() dto: UserInterestDto) {
-    return this.usersService.addUserInterests(userId, dto.interestIds);
-  }
-
-  // Delete interests
-  @Delete(routesV1.user.interestDelete)
-  @ApiOperation({
-    summary: 'Remove interests from user',
-    description: 'Removes specific interests from a user without affecting others',
-  })
-  @ApiParam({
-    name: 'userId',
-    type: String,
-    format: 'uuid',
-    description: 'User ID',
-  })
-  @ApiBody({ type: UserInterestDto })
-  @ApiOkResponse({
-    description: 'Interests successfully removed',
-    type: DeleteUserInterestResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'User not found',
-  })
-  deleteInterests(@Param('userId') userId: string, @Body() dto: UserInterestDto) {
-    return this.usersService.removeUserInterests(userId, dto.interestIds);
+  updateUserInterests(@Param('id') userId: string, @Body() dto: UpdateUserInterestsDto) {
+    return this.usersService.updateUserInterests(userId, dto);
   }
 }

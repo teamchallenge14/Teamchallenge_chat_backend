@@ -323,26 +323,35 @@ export class UsersRepository {
     });
   }
 
-  async addUserInterests(userId: string, interestIds: string[]): Promise<void> {
-    if (interestIds.length === 0) return;
+  async updateUserInterests(
+    userId: string,
+    params: { add: string[]; remove: string[] },
+  ): Promise<void> {
+    const { add, remove } = params;
 
-    await this.prisma.userInterest.createMany({
-      data: interestIds.map((interestId) => ({
-        userId,
-        interestId,
-      })),
-      skipDuplicates: true,
-    });
-  }
+    await this.prisma.$transaction([
+      ...(add.length
+        ? [
+            this.prisma.userInterest.createMany({
+              data: add.map((interestId) => ({
+                userId,
+                interestId,
+              })),
+              skipDuplicates: true,
+            }),
+          ]
+        : []),
 
-  async removeUserInterests(userId: string, interestIds: string[]): Promise<void> {
-    if (interestIds.length === 0) return;
-
-    await this.prisma.userInterest.deleteMany({
-      where: {
-        userId,
-        interestId: { in: interestIds },
-      },
-    });
+      ...(remove.length
+        ? [
+            this.prisma.userInterest.deleteMany({
+              where: {
+                userId,
+                interestId: { in: remove },
+              },
+            }),
+          ]
+        : []),
+    ]);
   }
 }

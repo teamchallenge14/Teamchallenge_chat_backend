@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.11] - 2026-01-30
+
+### Changed
+
+- put users interest replaced with path also changed answers and no longer does replaced
+
 ## [0.0.10] - 2026-01-29
 
 ### Changed

@@ -18,19 +18,20 @@ import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 import { pickDefined } from '@src/common/utils/pick-defined';
 import { UpdatedUserDto } from '@src/modules/users/dto/updated-user.dto';
 import { UsersRepository } from '@src/modules/users/repository/users.repository';
+import { UpdateUserInterestsDto } from '@src/modules/users/dto/update-user-interests.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly usersDao: UsersRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async create(dto: CreateUserDto): Promise<CreatedUserDto> {
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     try {
-      const user = await this.usersDao.createUser({
+      const user = await this.usersRepository.createUser({
         email: dto.email,
         login: dto.login,
         passwordHash,
@@ -68,7 +69,7 @@ export class UsersService {
     const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    const { users, total } = await this.usersDao.findAllPaginated({
+    const { users, total } = await this.usersRepository.findAllPaginated({
       skip,
       take: limit,
     });
@@ -102,7 +103,7 @@ export class UsersService {
       throw new BadRequestException('Provide at least one search parameter: id, login or email');
     }
 
-    const user = await this.usersDao.findOne({ id, login, email });
+    const user = await this.usersRepository.findOne({ id, login, email });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -152,7 +153,7 @@ export class UsersService {
       gender: dto.gender,
     });
 
-    const updatedUser = await this.usersDao.updateUser(id, {
+    const updatedUser = await this.usersRepository.updateUser(id, {
       authData: Object.keys(authData).length ? authData : undefined,
       profileData: Object.keys(profileData).length ? profileData : undefined,
     });
@@ -184,7 +185,7 @@ export class UsersService {
 
   // delete
   async delete(id: string): Promise<{ success: boolean }> {
-    const affected = await this.usersDao.softDelete(id);
+    const affected = await this.usersRepository.softDelete(id);
 
     if (affected === 0) {
       throw new NotFoundException('User not found');
@@ -193,62 +194,38 @@ export class UsersService {
     return { success: true };
   }
 
-  async setUserInterests(userId: string, interestIds: string[]): Promise<{ success: true }> {
-    const user = await this.usersDao.getUserAccountStatus(userId);
+  // set user interest
+  async updateUserInterests(
+    userId: string,
+    dto: UpdateUserInterestsDto,
+  ): Promise<{ success: true }> {
+    const user = await this.usersRepository.getUserAccountStatus(userId);
 
     if (!user || user.accountStatus === AccountStatus.DELETED) {
       throw new NotFoundException('User not found');
     }
 
-    const uniqueInterestIds = [...new Set(interestIds)];
+    const addIds = [...new Set(dto.add ?? [])];
+    const removeIds = [...new Set(dto.remove ?? [])];
 
-    if (uniqueInterestIds.length > 0) {
-      const existingCount = await this.usersDao.countExistingInterests(uniqueInterestIds);
+    const allInterestIds = [...new Set([...addIds, ...removeIds])];
 
-      if (existingCount !== uniqueInterestIds.length) {
+    if (allInterestIds.length > 0) {
+      const count = await this.usersRepository.countExistingInterests(allInterestIds);
+
+      if (count !== allInterestIds.length) {
         throw new NotFoundException('One or more interests not found');
       }
     }
 
-    await this.usersDao.replaceUserInterests(userId, uniqueInterestIds);
-
-    return { success: true };
-  }
-
-  // add user interests
-  async addUserInterests(userId: string, interestIds: string[]): Promise<{ success: true }> {
-    const user = await this.usersDao.getUserAccountStatus(userId);
-
-    if (!user || user.accountStatus === AccountStatus.DELETED) {
-      throw new NotFoundException('User not found');
+    if (addIds.length === 0 && removeIds.length === 0) {
+      return { success: true };
     }
 
-    const uniqueInterestIds = [...new Set(interestIds)];
-
-    if (uniqueInterestIds.length > 0) {
-      const count = await this.usersDao.countExistingInterests(uniqueInterestIds);
-
-      if (count !== uniqueInterestIds.length) {
-        throw new NotFoundException('One or more interests not found');
-      }
-    }
-
-    await this.usersDao.addUserInterests(userId, uniqueInterestIds);
-
-    return { success: true };
-  }
-
-  // remove user interests
-  async removeUserInterests(userId: string, interestIds: string[]): Promise<{ success: true }> {
-    const user = await this.usersDao.getUserAccountStatus(userId);
-
-    if (!user || user.accountStatus === AccountStatus.DELETED) {
-      throw new NotFoundException('User not found');
-    }
-
-    const uniqueInterestIds = [...new Set(interestIds)];
-
-    await this.usersDao.removeUserInterests(userId, uniqueInterestIds);
+    await this.usersRepository.updateUserInterests(userId, {
+      add: addIds,
+      remove: removeIds,
+    });
 
     return { success: true };
   }
