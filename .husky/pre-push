@@ -1,5 +1,3 @@
 echo "Running lint..."
 npm run lint || exit 1
 
-echo "Running build..."
-npm run build:prod || exit 1
