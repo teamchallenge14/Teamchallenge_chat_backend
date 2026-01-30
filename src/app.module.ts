@@ -12,11 +12,15 @@ import { PrismaModule } from '@db/prisma.module';
 import { PinoLoggerModule } from './infra/logger/pino.module';
 import { dbConfig } from './config';
 import { HealthModule } from './modules/health/health.module';
+import { ChangelogModule } from '@src/common/changelog/changelog.module';
 
 @Module({
   imports: [
     // LOGGER
     PinoLoggerModule,
+
+    // CHANGELOG
+    ChangelogModule,
 
     // DATABASES
     PrismaModule,

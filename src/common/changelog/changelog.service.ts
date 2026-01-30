@@ -1,15 +1,22 @@
-import { readFileSync } from 'fs';
+import { Injectable } from '@nestjs/common';
+import { promises as fs } from 'fs';
 import { join } from 'path';
 import { ChangelogParser } from './changelog.parser';
 
+@Injectable()
 export class ChangelogService {
-  private readonly raw: string;
+  private raw?: string;
 
-  constructor() {
-    this.raw = readFileSync(join(process.cwd(), 'CHANGELOG.md'), 'utf-8');
-  }
+  async getForSwagger(): Promise<string> {
+    if (!this.raw) {
+      try {
+        this.raw = await fs.readFile(join(process.cwd(), 'CHANGELOG.md'), 'utf-8');
+      } catch {
+        // сервер може бути без файлу — не падаємо
+        return '';
+      }
+    }
 
-  getForSwagger(): string {
     return ChangelogParser.toCollapsibleSections(this.raw, 3);
   }
 }

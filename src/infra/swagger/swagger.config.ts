@@ -1,9 +1,9 @@
 import { DocumentBuilder } from '@nestjs/swagger';
-import { ChangelogService } from '../../common/changelog/changelog.service';
+import { type ChangelogService } from '../../common/changelog/changelog.service';
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 
-export function buildSwaggerConfig() {
-  const changelog = new ChangelogService().getForSwagger();
+export async function buildSwaggerConfig(changelogService: ChangelogService) {
+  const changelog = await changelogService.getForSwagger();
 
   return new DocumentBuilder()
     .setTitle('TeamChallengeChatApi')

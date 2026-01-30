@@ -14,6 +14,7 @@ import './config';
 import { appConfig, corsConfig, loggerConfig } from './config';
 import { buildSwaggerConfig } from '@src/infra/swagger/swagger.config';
 import { GlobalExceptionFilter } from '@src/common/filters/global-exception.filter';
+import { ChangelogService } from '@src/common/changelog/changelog.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -80,7 +81,12 @@ async function bootstrap() {
   }
 
   // SWAGGER
-  const document = SwaggerModule.createDocument(app, buildSwaggerConfig());
+  const changelogService = app.get(ChangelogService);
+
+  const swaggerConfig = await buildSwaggerConfig(changelogService);
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+
   SwaggerModule.setup(appConfig.swaggerPath, app, document);
 
   await app.listen(appConfig.port);
