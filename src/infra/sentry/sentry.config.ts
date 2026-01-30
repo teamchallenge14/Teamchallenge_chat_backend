@@ -1,12 +1,12 @@
 import * as Sentry from '@sentry/nestjs';
-import { sentryConfig } from '@src/config';
+import { appConfig, sentryConfig } from '@src/config';
 
 export function initSentry() {
   if (!sentryConfig.enabled) {
     return;
   }
   const dsn = sentryConfig.dsn;
-  const env = sentryConfig.environment;
+  const env = appConfig.nodeEnv;
 
   Sentry.init({
     dsn,
