@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as Sentry from '@sentry/nestjs';
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from 'crypto';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
