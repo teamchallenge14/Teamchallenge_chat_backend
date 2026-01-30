@@ -17,13 +17,13 @@ import { AccountStatus, Prisma } from '@prisma/client';
 import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 import { pickDefined } from '@src/common/utils/pick-defined';
 import { UpdatedUserDto } from '@src/modules/users/dto/updated-user.dto';
-import { UsersDao } from '@src/modules/users/dao/users.dao';
+import { UsersRepository } from '@src/modules/users/repository/users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly usersDao: UsersDao,
+    private readonly usersDao: UsersRepository,
   ) {}
 
   async create(dto: CreateUserDto): Promise<CreatedUserDto> {

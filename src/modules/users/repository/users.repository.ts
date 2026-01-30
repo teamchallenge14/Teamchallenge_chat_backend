@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthProvider, AccountStatus, Gender, Prisma } from '@prisma/client';
 
 @Injectable()
-export class UsersDao {
+export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async createUser(params: {
