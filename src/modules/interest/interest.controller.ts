@@ -22,7 +22,7 @@ import { routesV1 } from '@src/config';
 export class InterestController {
   constructor(private readonly interestsService: InterestService) {}
 
-  @Post(routesV1.interests.crate)
+  @Post(routesV1.interests.create)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create interest' })
   create(@Body() dto: CreateInterestDto) {
