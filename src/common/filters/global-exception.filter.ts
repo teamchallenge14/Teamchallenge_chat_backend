@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as Sentry from '@sentry/nestjs';
+import { randomUUID } from 'crypto';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -27,7 +28,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     // 5xx
-    const traceId = `ERR-${crypto.randomUUID().slice(0, 8)}`;
+    const traceId = `ERR-${randomUUID().slice(0, 8)}`;
 
     // SENTRY HERE
     Sentry.captureException(exception, {
