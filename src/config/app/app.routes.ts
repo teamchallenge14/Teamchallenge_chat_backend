@@ -17,8 +17,6 @@ export const routesV1 = {
     findAll: `/${usersRoot}`,
     update: `/${usersRoot}/:id`,
     interest: `/${usersRoot}/:id/interests`,
-    interestAdd: `/${usersRoot}/:userId/interests/add`,
-    interestDelete: `/${usersRoot}/:userId/interests/delete`,
   },
   auth: {
     root: authRoot,
