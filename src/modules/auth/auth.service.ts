@@ -99,7 +99,7 @@ export class AuthService {
     }
 
     const user = {
-      id: authMethod.id,
+      id: authMethod.user.id,
       login: authMethod.login,
       email: authMethod.email,
       provider: authMethod.provider,
