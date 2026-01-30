@@ -67,7 +67,7 @@ export class AuthController {
   // =========================
   // REFRESH TOKEN
   // =========================
-  @Post('refresh')
+  @Post(routesV1.auth.refresh)
   @ApiCookieAuth(AUTH_COOKIES.REFRESH_TOKEN)
   @ApiOperation({
     summary: 'Refresh access token',
@@ -100,7 +100,7 @@ export class AuthController {
   // =========================
   // LOGIN (LOCAL)
   // =========================
-  @Post(`${routesV1.auth.root}/login`)
+  @Post(routesV1.auth.login)
   @UseGuards(AuthGuard('local'))
   @ApiOperation({
     summary: 'Login with local credentials',
@@ -147,7 +147,7 @@ export class AuthController {
   // =========================
   // GOOGLE AUTH
   // =========================
-  @Get(`${routesV1.auth.google}`)
+  @Get(routesV1.auth.google)
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
     summary: 'Google OAuth redirect',
@@ -156,7 +156,7 @@ export class AuthController {
   // @ApiExcludeEndpoint()
   google() {}
 
-  @Get(`${routesV1.auth.google}/callback`)
+  @Get(routesV1.auth.googleCallback)
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
     summary: 'Google OAuth callback',
@@ -182,7 +182,7 @@ export class AuthController {
   // =========================
   // GITHUB AUTH
   // =========================
-  @Get(`${routesV1.auth.github}`)
+  @Get(routesV1.auth.github)
   @UseGuards(AuthGuard('github'))
   @ApiOperation({
     summary: 'GitHub OAuth redirect',
@@ -191,7 +191,7 @@ export class AuthController {
   // @ApiExcludeEndpoint()
   github() {}
 
-  @Get(`${routesV1.auth.github}/callback`)
+  @Get(routesV1.auth.githubCallback)
   @UseGuards(AuthGuard('github'))
   @ApiOperation({
     summary: 'GitHub OAuth callback',
@@ -222,7 +222,7 @@ export class AuthController {
   // =========================
   // FACEBOOK AUTH
   // =========================
-  @Get(`${routesV1.auth.facebook}`)
+  @Get(routesV1.auth.facebook)
   @UseGuards(AuthGuard('facebook'))
   @ApiOperation({
     summary: 'Facebook OAuth redirect',
@@ -231,7 +231,7 @@ export class AuthController {
   // @ApiExcludeEndpoint()
   facebook() {}
 
-  @Get(`${routesV1.auth.facebook}/callback`)
+  @Get(routesV1.auth.facebookCallback)
   @UseGuards(AuthGuard('facebook'))
   @ApiOperation({
     summary: 'Facebook OAuth callback',
