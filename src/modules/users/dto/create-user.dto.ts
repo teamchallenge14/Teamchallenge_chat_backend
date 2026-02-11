@@ -9,6 +9,7 @@ import {
   IsInt,
   Min,
   Max,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -78,16 +79,14 @@ export class CreateUserDto {
   profileTheme?: string;
 
   @ApiPropertyOptional({
-    example: 25,
-    minimum: 12,
-    maximum: 120,
-    description: 'User age (minimum 12)',
+    example: '2000-05-15T00:00:00.000Z',
+    description: 'User birth date (ISO 8601 format)',
+    type: String,
+    format: 'date-time',
   })
   @IsOptional()
-  @IsInt()
-  @Min(12, { message: 'Age must be at least 12 years old' })
-  @Max(120, { message: 'Age must be realistic' })
-  age?: number;
+  @IsDateString({}, { message: 'birthDate must be a valid ISO 8601 date string' })
+  birthDate?: Date;
 
   @ApiPropertyOptional({
     enum: AccountStatus,

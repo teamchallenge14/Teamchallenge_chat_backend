@@ -25,7 +25,7 @@ export const routesV1 = {
     delete: `/${authRoot}/:id`,
     findOne: `/${authRoot}/:id`,
     update: `/${authRoot}/:id`,
-    refresh: `/${authRoot}/:id`,
+    refresh: `/${authRoot}/refresh`,
     login: `/${authRoot}/login`,
     google: `/${authRoot}/google`,
     github: `/${authRoot}/github`,

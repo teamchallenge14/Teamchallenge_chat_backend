@@ -29,6 +29,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           timestamp,
         });
       }
+      console.log(exception);
 
       // 5xx
       const traceId = `ERR-${randomUUID().slice(0, 8)}`;

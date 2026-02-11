@@ -64,9 +64,7 @@ export class RoomsService {
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        this.logger.warn(
-          `Room creation prisma error: code=${error.code}, userId=${userId}`,
-        );
+        this.logger.warn(`Room creation prisma error: code=${error.code}, userId=${userId}`);
 
         if (error.code === 'P2002') {
           throw new ConflictException('Room already exists');
@@ -129,7 +127,9 @@ export class RoomsService {
     };
   }
 
-  private async uploadRoomPhoto(file: Express.Multer.File | undefined): Promise<UploadResult | null> {
+  private async uploadRoomPhoto(
+    file: Express.Multer.File | undefined,
+  ): Promise<UploadResult | null> {
     if (!file) return null;
     return this.cloudinaryService.uploadBuffer(file.buffer, {
       folder: 'rooms/photos',
@@ -156,10 +156,7 @@ export class RoomsService {
     ];
   }
 
-  async findOne(
-    userId: string | undefined,
-    roomId: string,
-  ): Promise<RoomDetailsDto> {
+  async findOne(userId: string | undefined, roomId: string): Promise<RoomDetailsDto> {
     if (!userId) {
       this.logger.warn('Room fetch attempt without authentication');
       throw new UnauthorizedException('User is not authenticated');
@@ -202,10 +199,24 @@ export class RoomsService {
         firstName: member.user.data?.firstName ?? undefined,
         lastName: member.user.data?.lastName ?? undefined,
         avatar: member.user.data?.avatar ?? undefined,
-        age: member.user.data?.age ?? undefined,
+        age: calculateAge(member.user.data?.birthDate),
         gender: member.user.data?.gender ?? undefined,
         role: member.role,
       })),
     };
   }
+}
+
+function calculateAge(birthDate?: Date | null): number | undefined {
+  if (!birthDate) return undefined;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
 }

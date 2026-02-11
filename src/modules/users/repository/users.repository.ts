@@ -16,7 +16,7 @@ export class UsersRepository {
       description?: string;
       avatar?: string;
       profileTheme?: string;
-      age?: number;
+      birthDate?: Date;
       gender?: Gender;
     };
   }) {
@@ -50,7 +50,7 @@ export class UsersRepository {
             description: true,
             avatar: true,
             profileTheme: true,
-            age: true,
+            birthDate: true,
             gender: true,
             updatedAt: true,
           },
@@ -163,7 +163,7 @@ export class UsersRepository {
             description: true,
             avatar: true,
             profileTheme: true,
-            age: true,
+            birthDate: true,
             gender: true,
           },
         },
@@ -198,7 +198,7 @@ export class UsersRepository {
         description?: string;
         avatar?: string;
         profileTheme?: string;
-        age?: number;
+        birthDate?: Date;
         gender?: Gender;
       };
     },
@@ -265,7 +265,7 @@ export class UsersRepository {
               description: true,
               avatar: true,
               profileTheme: true,
-              age: true,
+              birthDate: true,
               gender: true,
             },
           },

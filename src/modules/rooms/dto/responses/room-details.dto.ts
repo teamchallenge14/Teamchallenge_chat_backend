@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender, RoomMemberRole } from '@prisma/client';
 import { CreatedRoomDto } from './created-room.dto';
+import { IsDateString, IsOptional } from 'class-validator';
 
 export class RoomMemberDto {
   @ApiPropertyOptional({
@@ -19,10 +20,14 @@ export class RoomMemberDto {
   avatar?: string;
 
   @ApiPropertyOptional({
-    example: 25,
-    minimum: 0,
+    example: '2000-05-15T00:00:00.000Z',
+    description: 'User birth date (ISO 8601 format)',
+    type: String,
+    format: 'date',
   })
-  age?: number;
+  @IsOptional()
+  @IsDateString({}, { message: 'birthDate must be a valid ISO 8601 date string' })
+  birthDate?: Date;
 
   @ApiPropertyOptional({
     enum: Gender,

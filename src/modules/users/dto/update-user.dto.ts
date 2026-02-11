@@ -10,6 +10,7 @@ import {
   Matches,
   IsUUID,
   IsArray,
+  IsDateString,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
 
@@ -92,12 +93,14 @@ export class UpdateUserDto {
   profileTheme?: string;
 
   @ApiPropertyOptional({
-    example: 25,
-    minimum: 0,
+    example: '2000-05-15T00:00:00.000Z',
+    description: 'User birth date (ISO 8601 format)',
+    type: String,
+    format: 'date-time',
   })
   @IsOptional()
-  @IsNumber()
-  age?: number;
+  @IsDateString({}, { message: 'birthDate must be a valid ISO 8601 date string' })
+  birthDate?: Date;
 
   @ApiPropertyOptional({
     enum: Gender,

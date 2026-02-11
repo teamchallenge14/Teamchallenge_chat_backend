@@ -41,7 +41,7 @@ export class UsersService {
           description: dto.description,
           avatar: dto.avatar,
           profileTheme: dto.profileTheme,
-          age: dto.age,
+          birthDate: dto.birthDate,
           gender: dto.gender,
         },
       });
@@ -123,7 +123,7 @@ export class UsersService {
       description: user.data?.description ?? undefined,
       avatar: user.data?.avatar ?? undefined,
       profileTheme: user.data?.profileTheme ?? undefined,
-      age: user.data?.age ?? undefined,
+      birthDate: user.data?.birthDate ?? undefined,
       gender: user.data?.gender ?? undefined,
 
       provider: localAuth?.provider,
@@ -149,7 +149,7 @@ export class UsersService {
       description: dto.description,
       avatar: dto.avatar,
       profileTheme: dto.profileTheme,
-      age: dto.age,
+      birthDate: dto.birthDate,
       gender: dto.gender,
     });
 
@@ -178,7 +178,7 @@ export class UsersService {
       description: updatedUser.data?.description ?? undefined,
       avatar: updatedUser.data?.avatar ?? undefined,
       profileTheme: updatedUser.data?.profileTheme ?? undefined,
-      age: updatedUser.data?.age ?? undefined,
+      birthDate: updatedUser.data?.birthDate ?? undefined,
       gender: updatedUser.data?.gender ?? undefined,
     };
   }

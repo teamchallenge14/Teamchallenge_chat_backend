@@ -47,7 +47,7 @@ model UserData {
   description  String?
   avatar       String?
   profileTheme String?
-  age          Int?
+  birthDate    DateTime?
   gender       Gender   @default(UNSPECIFIED)
   updatedAt    DateTime @updatedAt
 

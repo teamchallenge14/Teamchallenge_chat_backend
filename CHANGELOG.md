@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.13] - 2026-02-11
+
+### Changed
+
+- user age(int) changed to birthDate (DateTime)
+
 ## [0.0.12] - 2026-02-04
 
 ### Added

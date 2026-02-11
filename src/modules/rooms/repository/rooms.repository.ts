@@ -1,6 +1,12 @@
 import { PrismaService } from '@db/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { RoomLanguage, RoomMemberRole, RoomStatus, RoomType, InterestCategory } from '@prisma/client';
+import {
+  RoomLanguage,
+  RoomMemberRole,
+  RoomStatus,
+  RoomType,
+  InterestCategory,
+} from '@prisma/client';
 import { CreateRoomDto } from '../dto/create-room.dto';
 
 @Injectable()
@@ -185,7 +191,7 @@ export class RoomsRepository {
                     firstName: true,
                     lastName: true,
                     avatar: true,
-                    age: true,
+                    birthDate: true,
                     gender: true,
                   },
                 },

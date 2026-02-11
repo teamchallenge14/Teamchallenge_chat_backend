@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AccountStatus, AuthProvider, Gender } from '@prisma/client';
 import { InterestDto } from '@src/modules/interests/dto/interests.dto';
-import { IsNumber, IsOptional, IsUUID } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsUUID } from 'class-validator';
 
 export class FullUserDto {
   @ApiProperty({
@@ -52,12 +52,14 @@ export class FullUserDto {
   profileTheme?: string;
 
   @ApiPropertyOptional({
-    example: 25,
-    minimum: 0,
+    example: '2000-05-15T00:00:00.000Z',
+    description: 'User birth date (ISO 8601 format)',
+    type: String,
+    format: 'date-time',
   })
   @IsOptional()
-  @IsNumber()
-  age?: number;
+  @IsDateString({}, { message: 'birthDate must be a valid ISO 8601 date string' })
+  birthDate?: Date;
 
   @ApiProperty({
     enum: AccountStatus,
