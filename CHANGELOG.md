@@ -18,6 +18,13 @@ and this project adheres to Semantic Versioning.
 ## [0.0.15] - 2026-02-17
 
 ### Added
+ - Guest user registration
+
+
+
+## [0.0.15] - 2026-02-17
+
+### Added
 
 - Rooms list now returns only rooms where the user is a member or owner
 - Rooms list items now include members with basic user data and role

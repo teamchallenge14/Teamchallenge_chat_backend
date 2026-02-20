@@ -32,6 +32,8 @@ import { CreatedUserDto } from '@src/modules/users/dto/created-user.dto';
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 import { Public } from '@src/common/decorators/public.decorator';
 import { TenantId } from '@src/common/decorators/tenant-id.decorator';
+import { CreateGuestRequestDto } from '@src/modules/users/dto/create-guest-request.dto';
+import { RegisterGuestResponseDto } from '@src/modules/auth/dto/register-guest.response.dto';
 
 @ApiTags(routesV1.auth.root)
 @Controller(routesV1.version)
@@ -45,7 +47,7 @@ export class AuthController {
   // REGISTER (LOCAL)
   // =========================
   @Public()
-  @Post(routesV1.auth.root)
+  @Post(routesV1.auth.registerUser)
   @ApiOperation({
     summary: 'Register user (local)',
     description:
@@ -63,6 +65,33 @@ export class AuthController {
     @TenantId() tenantId: string,
   ): Promise<RegisterUserResponseDto> {
     const { user, accessToken, refreshToken } = await this.authService.register(dto, tenantId);
+
+    this.authCookiesService.setAuthCookies(res, { accessToken, refreshToken });
+    return { user, accessToken };
+  }
+
+  // =========================
+  // REGISTER (GUEST)
+  // =========================
+  @Public()
+  @Post(routesV1.auth.registerGuest)
+  @ApiOperation({
+    summary: 'Register guest ',
+    description:
+      'Creates a new guest with local credentials. Access and refresh tokens are returned via HttpOnly cookies.',
+  })
+  @ApiBody({ type: CreateGuestRequestDto })
+  @ApiCreatedResponse({
+    description: 'User successfully registered',
+    type: RegisterUserResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Registration failed' })
+  async registerGuest(
+    @Body() dto: CreateGuestRequestDto,
+    @Res({ passthrough: true }) res: Response,
+    @TenantId() tenantId: string,
+  ): Promise<RegisterGuestResponseDto> {
+    const { user, accessToken, refreshToken } = await this.authService.registerGuest(dto, tenantId);
 
     this.authCookiesService.setAuthCookies(res, { accessToken, refreshToken });
     return { user, accessToken };

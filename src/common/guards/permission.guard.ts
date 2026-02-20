@@ -11,7 +11,7 @@ import {
   RequiredPermissionConfig,
 } from '../decorators/require-permissions.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { Permission } from '@prisma/client';
+import { AccountStatus, Permission } from '@prisma/client';
 import { UsersRepository } from '@src/modules/users/repository/users.repository';
 
 @Injectable()
@@ -54,11 +54,16 @@ export class PermissionGuard implements CanActivate {
 
     // check if permissions exist
     if (!request.permissions) {
-      const permissions = await this.UserRepository.getUserPermissions(user.id, tenantId);
+      const TenantUser = await this.UserRepository.getTenantUserWithPermissions(user.id, tenantId);
 
-      if (!permissions) {
+      if (!TenantUser?.permissions) {
         throw new ForbiddenException('User not in tenant');
       }
+      if (TenantUser.tenantStatus !== AccountStatus.ACTIVE) {
+        throw new ForbiddenException('User blocked');
+      }
+
+      const permissions = TenantUser.permissions.map((p) => p.permission);
 
       request.permissions = permissions;
     }

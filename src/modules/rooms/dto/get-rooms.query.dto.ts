@@ -16,5 +16,4 @@ export class GetRoomsQueryDto extends PaginationQueryDto {
   @IsEnum(SortOrder)
   @IsOptional()
   membersCount?: SortOrder;
-
 }

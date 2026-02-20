@@ -8,6 +8,7 @@ import { AccountStatus, AuthProvider } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import type { Response, Request } from 'express';
 import { AuthCookiesService } from '@src/modules/auth/cookies/auth-cookies.service';
+import { CreateGuestRequestDto } from '@src/modules/users/dto/create-guest-request.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -20,6 +21,26 @@ export class AuthService {
 
   async register(dto: CreateUserDto, tenantId: string) {
     const user = await this.usersService.create(dto, tenantId);
+
+    if (!user.login) {
+      throw new UnauthorizedException('User login is missing');
+    }
+
+    const accessToken = this.accessTokenService.generate({
+      sub: user.id,
+      login: user.login,
+    });
+
+    const refreshToken = await this.refreshTokenService.createRefreshToken(user.id);
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
+  }
+  async registerGuest(dto: CreateGuestRequestDto, tenantId: string) {
+    const user = await this.usersService.createGuest(dto, tenantId);
 
     if (!user.login) {
       throw new UnauthorizedException('User login is missing');

@@ -16,6 +16,7 @@ export const routesV1 = {
   user: {
     root: usersRoot,
     create: `/${usersRoot}`,
+    createGuest: `/${usersRoot}/guest`,
     delete: `/${usersRoot}/:id`,
     findOne: `/${usersRoot}/:id`,
     findAll: `/${usersRoot}`,
@@ -28,6 +29,8 @@ export const routesV1 = {
     findOne: `/${authRoot}/:id`,
     update: `/${authRoot}/:id`,
     refresh: `/${authRoot}/refresh`,
+    registerUser: authRoot,
+    registerGuest: `/${authRoot}/guest`,
     login: `/${authRoot}/login`,
     google: `/${authRoot}/google`,
     github: `/${authRoot}/github`,

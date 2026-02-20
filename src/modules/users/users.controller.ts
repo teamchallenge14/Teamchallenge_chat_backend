@@ -38,6 +38,8 @@ import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants
 import { UpdateUserInterestsDto } from '@src/modules/users/dto/update-user-interests.dto';
 import { TenantId } from '@src/common/decorators/tenant-id.decorator';
 import { Public } from '@src/common/decorators';
+import { GuestResponseDto } from '@src/modules/users/dto/guest-response.dto';
+import { CreateGuestRequestDto } from '@src/modules/users/dto/create-guest-request.dto';
 
 @ApiTags(routesV1.user.root)
 @Public()
@@ -69,6 +71,23 @@ export class UsersController {
     @TenantId() tenantId: string,
   ): Promise<CreatedUserDto> {
     return this.usersService.create(createUserDto, tenantId);
+  }
+
+  // create guest
+  @Post(routesV1.user.createGuest)
+  @ApiOperation({ summary: 'Register guest user' })
+  @ApiCreatedResponse({
+    description: 'User successfully created',
+    type: GuestResponseDto,
+  })
+  @ApiConflictResponse({
+    description: 'User already exists (duplicate login or email)',
+  })
+  @ApiBadRequestResponse({
+    description: 'Validation error',
+  })
+  async createGuest(@Body() dto: CreateGuestRequestDto, @TenantId() tenantId: string) {
+    return this.usersService.createGuest(dto, tenantId);
   }
 
   // get all users

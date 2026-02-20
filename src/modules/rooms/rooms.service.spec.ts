@@ -17,7 +17,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { CloudinaryService } from '@src/infra/cloudinary/cloudinary.service';
-import { CreateRoomDto } from './dto/create-room.dto';
+import { type CreateRoomDto } from './dto/create-room.dto';
 import { SortOrder } from './dto/get-rooms.query.dto';
 import { RoomsRepository } from './repository/rooms.repository';
 import { RoomsService } from './rooms.service';
@@ -72,7 +72,7 @@ const buildRoom = (members: Array<{ userId: string }>) =>
         data: {},
       },
     })),
-  } as any);
+  }) as any;
 
 const buildPrismaError = (code: string) =>
   new Prisma.PrismaClientKnownRequestError('error', {
@@ -406,19 +406,13 @@ describe('RoomsService', () => {
     it('throws NotFoundException when room is not found', async () => {
       roomsRepository.findRoomWithMembers.mockResolvedValue(null);
 
-      await expect(service.findOne('user-id', 'room-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('user-id', 'room-id')).rejects.toThrow(NotFoundException);
     });
 
     it('throws ForbiddenException when user is not a member', async () => {
-      roomsRepository.findRoomWithMembers.mockResolvedValue(
-        buildRoom([{ userId: 'other-user' }]),
-      );
+      roomsRepository.findRoomWithMembers.mockResolvedValue(buildRoom([{ userId: 'other-user' }]));
 
-      await expect(service.findOne('user-id', 'room-id')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(service.findOne('user-id', 'room-id')).rejects.toThrow(ForbiddenException);
     });
 
     it('maps member details including age and gender', async () => {

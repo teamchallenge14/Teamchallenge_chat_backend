@@ -19,6 +19,9 @@ import { pickDefined } from '@src/common/utils/pick-defined';
 import { UpdatedUserDto } from '@src/modules/users/dto/updated-user.dto';
 import { UsersRepository } from '@src/modules/users/repository/users.repository';
 import { UpdateUserInterestsDto } from '@src/modules/users/dto/update-user-interests.dto';
+import { CreateGuestRequestDto } from '@src/modules/users/dto/create-guest-request.dto';
+import { GuestResponseDto } from '@src/modules/users/dto/guest-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -81,6 +84,63 @@ export class UsersService {
         if (e.code === 'P2002') {
           throw new ConflictException('User already exists');
         }
+      }
+      throw e;
+    }
+  }
+  // create guest
+  async createGuest(dto: CreateGuestRequestDto, tenantId: string): Promise<GuestResponseDto> {
+    try {
+      const user = await this.usersRepository.createGuest({
+        login: dto.login,
+        profile: {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          description: dto.description,
+          profileTheme: dto.profileTheme,
+          birthDate: dto.birthDate,
+          gender: dto.gender,
+        },
+      });
+
+      const tenantUser = await this.prisma.tenantUser.create({
+        data: {
+          userId: user.id,
+          tenantId,
+          tenantStatus: AccountStatus.ACTIVE,
+        },
+      });
+
+      // based permissions
+      const basePermissions: Permission[] = [
+        Permission.CHAT_READ,
+        Permission.CHAT_WRITE,
+        Permission.USER_READ,
+        Permission.USER_UPDATE,
+      ];
+
+      await this.prisma.tenantUserPermission.createMany({
+        data: basePermissions.map((p) => ({
+          tenantUserId: tenantUser.id,
+          permission: p,
+        })),
+        skipDuplicates: true,
+      });
+
+      return plainToInstance(
+        GuestResponseDto,
+        {
+          id: user.id,
+          login: user.authMethods[0].login,
+          provider: user.authMethods[0].provider,
+          accountStatus: user.accountStatus,
+          createdAt: user.createdAt,
+        },
+        { excludeExtraneousValues: true },
+      );
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        throw new ConflictException('Login already exists');
       }
       throw e;
     }
