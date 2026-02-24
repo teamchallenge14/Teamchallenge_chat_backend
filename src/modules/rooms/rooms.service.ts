@@ -254,11 +254,7 @@ export class RoomsService {
     };
   }
 
-  async reportRoom(
-    userId: string,
-    roomId: string,
-    dto: ReportRoomDto,
-  ): Promise<{ success: true }> {
+  async reportRoom(userId: string, roomId: string, dto: ReportRoomDto): Promise<{ success: true }> {
     this.logger.log(`Room report started: roomId=${roomId}, reporterId=${userId}`);
 
     try {

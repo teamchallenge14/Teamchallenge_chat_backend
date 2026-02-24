@@ -15,6 +15,7 @@ import { HealthModule } from './modules/health/health.module';
 import { ChangelogModule } from '@src/common/changelog/changelog.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
 import { MediaModule } from './modules/media/media.module';
+import { RandomMatchModule } from './modules/random-match/random-match.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { PermissionGuard } from '@src/common/guards/permission.guard';
@@ -41,6 +42,7 @@ import { TenantGuard } from '@src/common/guards/tenant.guard';
     MailModule,
     RoomsModule,
     MediaModule,
+    RandomMatchModule,
     HealthModule,
     TenantModule,
   ],

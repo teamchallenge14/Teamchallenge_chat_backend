@@ -5,6 +5,7 @@ const mailRoot = 'mail';
 const interestsRoot = 'interests';
 const roomsRoot = 'rooms';
 const mediaRoot = 'media';
+const randomMatchRoot = 'random-match';
 const tenantsRoot = 'tenant';
 const healthsRoot = 'health';
 
@@ -57,6 +58,10 @@ export const routesV1 = {
   media: {
     root: mediaRoot,
     upload: `/${mediaRoot}/upload`,
+  },
+  randomMatch: {
+    root: randomMatchRoot,
+    start: `/${randomMatchRoot}/start`,
   },
   mail: {
     confirm: `/${mailRoot}/confirm`,

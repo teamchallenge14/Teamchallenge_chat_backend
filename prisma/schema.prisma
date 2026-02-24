@@ -65,6 +65,7 @@ model User {
   tenants            TenantUser[]
   data               UserData?
   userInterests      UserInterest[]
+  randomMatchPreference RandomMatchPreference?
   ownedRooms         Room[]        @relation("RoomOwner")
   roomMembers        RoomMember[]
   roomReports        RoomReport[]
@@ -98,6 +99,7 @@ model UserData {
   profileTheme String?
   birthDate    DateTime?
   gender       Gender   @default(UNSPECIFIED)
+  language     RoomLanguage?
   updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
@@ -112,6 +114,7 @@ model Interest {
 
   users UserInterest[]
   roomInterests RoomInterest[]
+  randomMatchPreferenceInterests RandomMatchPreferenceInterest[]
 }
 
 model UserInterest {
@@ -122,6 +125,30 @@ model UserInterest {
   interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
 
   @@id([userId, interestId])
+}
+
+model RandomMatchPreference {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  minAge    Int?
+  maxAge    Int?
+  genders   Gender[] @default([])
+  languages RoomLanguage[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interests RandomMatchPreferenceInterest[]
+}
+
+model RandomMatchPreferenceInterest {
+  preferenceId String
+  interestId   String
+
+  preference RandomMatchPreference @relation(fields: [preferenceId], references: [id], onDelete: Cascade)
+  interest   Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
+
+  @@id([preferenceId, interestId])
 }
 
 model Room {
