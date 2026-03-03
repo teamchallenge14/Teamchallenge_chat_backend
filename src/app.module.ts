@@ -21,6 +21,7 @@ import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { PermissionGuard } from '@src/common/guards/permission.guard';
 import { TenantModule } from '@src/modules/tenant/tenant.module';
 import { TenantGuard } from '@src/common/guards/tenant.guard';
+import { WebsocketModule } from './modules/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { TenantGuard } from '@src/common/guards/tenant.guard';
     RandomMatchModule,
     HealthModule,
     TenantModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [

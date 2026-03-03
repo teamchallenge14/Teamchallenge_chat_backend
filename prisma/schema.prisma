@@ -71,6 +71,7 @@ model User {
   roomReports        RoomReport[]
   emailVerifications EmailVerification[]
   passwordResets PasswordReset[]
+  joinRequests       RoomJoinRequest[] 
 }
 
 model AuthMethod {
@@ -169,6 +170,7 @@ model Room {
   interests RoomInterest[]
   media     Media[]
   reports   RoomReport[]
+  joinRequests RoomJoinRequest[]
 }
 
 model Media {
@@ -209,6 +211,21 @@ model RoomInterest {
   interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
 
   @@id([roomId, interestId])
+}
+
+model RoomJoinRequest {
+  id        String   @id @default(uuid())
+  roomId    String
+  userId    String
+  status    JoinRequestStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId, status])
 }
 
 model RoomReport {
@@ -324,4 +341,10 @@ enum RoomMemberRole {
 enum RoomLanguage {
   EN
   UK
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

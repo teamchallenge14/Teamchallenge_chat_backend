@@ -2,6 +2,7 @@ import { PrismaService } from '@db/prisma.service';
 import { Injectable } from '@nestjs/common';
 import {
   InterestCategory,
+  JoinRequestStatus,
   Prisma,
   RoomLanguage,
   RoomMemberRole,
@@ -297,5 +298,61 @@ export class RoomsRepository {
     ]);
 
     return { rooms, total };
+  }
+
+  async findRoomById(roomId: string) {
+    return this.prisma.room.findUnique({
+      where: { id: roomId },
+    });
+  }
+
+  async isMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.findUnique({
+      where: {
+        roomId_userId: { roomId, userId },
+      },
+    });
+  }
+
+  async createMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.create({
+      data: {
+        roomId,
+        userId,
+      },
+    });
+  }
+
+  async removeMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.delete({
+      where: {
+        roomId_userId: { roomId, userId },
+      },
+    });
+  }
+
+  async createJoinRequest(roomId: string, userId: string) {
+    return this.prisma.roomJoinRequest.create({
+      data: {
+        roomId,
+        userId,
+      },
+    });
+  }
+
+  async findJoinRequestById(id: string) {
+    return this.prisma.roomJoinRequest.findUnique({
+      where: { id },
+    });
+  }
+
+  async updateJoinRequest(id: string, status: JoinRequestStatus) {
+    return this.prisma.roomJoinRequest.update({
+      where: { id },
+      data: {
+        status,
+        reviewedAt: new Date(),
+      },
+    });
   }
 }

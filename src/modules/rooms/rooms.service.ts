@@ -327,6 +327,41 @@ export class RoomsService {
       throw error;
     }
   }
+  async joinRoom(roomId: string, userId: string) {
+    const room = await this.roomsRepository.findRoomById(roomId);
+    if (!room) throw new NotFoundException('Room not found');
+
+    const existingMember = await this.roomsRepository.isMember(roomId, userId);
+    if (existingMember) throw new BadRequestException('Already a member');
+
+    if (room.type === 'PUBLIC') {
+      return this.roomsRepository.createMember(roomId, userId);
+    }
+
+    return this.roomsRepository.createJoinRequest(roomId, userId);
+  }
+
+  async approveRequest(requestId: string, ownerId: string, action: string) {
+    const request = await this.roomsRepository.findJoinRequestById(requestId);
+    if (!request) throw new NotFoundException('Request not found');
+
+    const room = await this.roomsRepository.findRoomById(request.roomId);
+    if (room?.ownerId !== ownerId) throw new ForbiddenException('Not room owner');
+
+    if (action === 'APPROVE') {
+      await this.roomsRepository.createMember(request.roomId, request.userId);
+      return this.roomsRepository.updateJoinRequest(requestId, 'APPROVED');
+    }
+
+    return this.roomsRepository.updateJoinRequest(requestId, 'REJECTED');
+  }
+
+  async leaveRoom(roomId: string, userId: string) {
+    const member = await this.roomsRepository.isMember(roomId, userId);
+    if (!member) throw new BadRequestException('Not a member');
+
+    return this.roomsRepository.removeMember(roomId, userId);
+  }
 }
 
 function calculateAge(birthDate?: Date | null): number | undefined {

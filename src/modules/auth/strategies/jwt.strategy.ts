@@ -8,7 +8,15 @@ import { AccessTokenPayload } from '@src/modules/auth/interfaces/access-token.pa
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (request: any) => {
+          if (request?.handshake?.auth?.token) {
+            return request.handshake.auth.token;
+          }
+          return null;
+        },
+      ]),
       secretOrKey: jwtConfig.secret,
       ignoreExpiration: false,
     });
