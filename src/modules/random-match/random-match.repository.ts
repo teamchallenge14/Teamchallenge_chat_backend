@@ -73,15 +73,15 @@ export class RandomMatchRepository {
         update: {
           minAge: minAge ?? null,
           maxAge: maxAge ?? null,
-          genders,
-          languages,
+          genders: genders ?? [],
+          languages: languages ?? [],
         },
         create: {
           userId,
           minAge: minAge ?? null,
           maxAge: maxAge ?? null,
-          genders,
-          languages,
+          genders: genders ?? [],
+          languages: languages ?? [],
         },
         select: { id: true },
       });

@@ -24,9 +24,8 @@ export class RandomMatchController {
     @Req() req: Request,
     @Body() dto: StartRandomMatchDto,
   ): Promise<RandomMatchResponseDto> {
-    const user = req.user as { id: string };
-    const tenantId = (req as Request & { tenantId: string }).tenantId;
+    const { user, tenantId } = req as Request & { user: { id: string }; tenantId: string };
 
-    return this.randomMatchService.startMatch(user?.id, tenantId, dto);
+    return this.randomMatchService.startMatch(user.id, tenantId, dto);
   }
 }

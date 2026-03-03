@@ -1,7 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayUnique, IsArray, IsEnum, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsUUID,
+  Max,
+  Min,
+  Validate,
+} from 'class-validator';
 import { Gender, RoomLanguage } from '@prisma/client';
+import { MaxAgeGteMinAgeConstraint } from '../../../common/validators/max-age-gte-min-age.validator';
 
 export class StartRandomMatchDto {
   @ApiPropertyOptional({
@@ -60,6 +71,7 @@ export class StartRandomMatchDto {
   @IsInt()
   @Min(12)
   @Max(100)
+  @Validate(MaxAgeGteMinAgeConstraint)
   @IsOptional()
   maxAge?: number;
 
