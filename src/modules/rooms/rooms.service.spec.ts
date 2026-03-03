@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   ConflictException,
@@ -36,6 +38,10 @@ type RoomsRepositoryMock = {
 
 type CloudinaryServiceMock = {
   uploadBuffer: jest.Mock;
+};
+
+type MailServiceMock = {
+  send: jest.Mock;
 };
 
 const baseDto: CreateRoomDto = {
@@ -99,6 +105,7 @@ describe('RoomsService', () => {
   let service: RoomsService;
   let roomsRepository: RoomsRepositoryMock;
   let cloudinaryService: CloudinaryServiceMock;
+  let mailService: MailServiceMock;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -135,6 +142,7 @@ describe('RoomsService', () => {
     service = module.get<RoomsService>(RoomsService);
     roomsRepository = module.get(RoomsRepository);
     cloudinaryService = module.get(CloudinaryService);
+    mailService = module.get(MailService);
   });
 
   describe('create', () => {
