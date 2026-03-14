@@ -16,7 +16,6 @@ import { routesV1 } from '@src/config';
 import { RequirePermissions } from '@src/common/decorators';
 import { Permission } from '@prisma/client';
 
-
 @ApiTags(routesV1.tenant.root)
 @Controller(routesV1.version)
 export class TenantController {

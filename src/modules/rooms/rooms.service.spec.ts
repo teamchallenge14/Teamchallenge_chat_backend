@@ -23,6 +23,21 @@ import { RoomsRepository } from './repository/rooms.repository';
 import { RoomsService } from './rooms.service';
 import { MailService } from '@src/modules/mail/mail.service';
 
+type RoomsRepositoryMock = {
+  createRoomWithRelations: jest.Mock;
+  countInterestsByIds: jest.Mock;
+  findAllPaginated: jest.Mock;
+  findUserAccountStatus: jest.Mock;
+  findRoomWithMembers: jest.Mock;
+  countReportsByUserSince: jest.Mock;
+  createRoomReport: jest.Mock;
+  findUserEmail: jest.Mock;
+};
+
+type CloudinaryServiceMock = {
+  uploadBuffer: jest.Mock;
+};
+
 const baseDto: CreateRoomDto = {
   name: 'Gaming Night',
   type: RoomType.PUBLIC,
@@ -82,9 +97,8 @@ const buildPrismaError = (code: string) =>
 
 describe('RoomsService', () => {
   let service: RoomsService;
-  let roomsRepository: jest.Mocked<RoomsRepository>;
-  let cloudinaryService: jest.Mocked<CloudinaryService>;
-  let mailService: jest.Mocked<MailService>;
+  let roomsRepository: RoomsRepositoryMock;
+  let cloudinaryService: CloudinaryServiceMock;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -119,9 +133,8 @@ describe('RoomsService', () => {
     }).compile();
 
     service = module.get<RoomsService>(RoomsService);
-    roomsRepository = module.get(RoomsRepository) as jest.Mocked<RoomsRepository>;
-    cloudinaryService = module.get(CloudinaryService) as jest.Mocked<CloudinaryService>;
-    mailService = module.get(MailService) as jest.Mocked<MailService>;
+    roomsRepository = module.get(RoomsRepository);
+    cloudinaryService = module.get(CloudinaryService);
   });
 
   describe('create', () => {

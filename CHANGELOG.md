@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.17] - 2026-02-20
+
+### Added
+
+- POST `/v1/random-match/start` endpoint to start random matching with optional filters
+- Random match preferences models (`RandomMatchPreference`, `RandomMatchPreferenceInterest`)
+- `UserData.language` field to store user UI language for matching
+- Random match response includes a message when no match is found
+
 ## [0.0.16] - 2026-02-18
 
 ### Added
@@ -18,9 +27,8 @@ and this project adheres to Semantic Versioning.
 ## [0.0.15] - 2026-02-17
 
 ### Added
- - Guest user registration
 
-
+- Guest user registration
 
 ## [0.0.15] - 2026-02-17
 

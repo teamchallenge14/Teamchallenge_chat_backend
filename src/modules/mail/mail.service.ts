@@ -27,10 +27,7 @@ export class MailService {
   // =========================
   // PUBLIC API
   // =========================
-  async send(
-    type: MailType,
-    payload: { email: string } | RoomReportPayload,
-  ) {
+  async send(type: MailType, payload: { email: string } | RoomReportPayload) {
     switch (type) {
       case MailType.VERIFY_EMAIL:
         return this.sendVerifyEmail((payload as { email: string }).email);

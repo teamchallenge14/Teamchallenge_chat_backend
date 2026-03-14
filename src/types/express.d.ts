@@ -2,6 +2,7 @@
 
 import { type CreatedUserDto } from '@/modules/auth/dto/created-user.dto';
 import { type AuthProvider } from '@/modules/auth/enums/auth-provider.enum';
+import { type Permission } from '@prisma/client';
 
 declare global {
   namespace Express {
@@ -15,6 +16,8 @@ declare global {
             email?: string;
             login?: string;
           };
+      tenantId?: string;
+      permissions?: Permission[];
     }
   }
 }

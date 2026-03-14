@@ -17,8 +17,8 @@ export const roomReportTemplate = (payload: {
         <h2>Room Report</h2>
         <p><strong>Reporter:</strong> ${escapeHtml(payload.reporterEmail)}</p>
         <p><strong>Room:</strong> ${escapeHtml(payload.roomName)} (${escapeHtml(
-      payload.roomId,
-    )})</p>
+          payload.roomId,
+        )})</p>
         <p><strong>Room Owner ID:</strong> ${escapeHtml(payload.roomOwnerId)}</p>
         <p><strong>Reason:</strong> ${escapeHtml(payload.reason)}</p>
         ${detailsHtml}
