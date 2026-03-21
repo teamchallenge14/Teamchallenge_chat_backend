@@ -42,7 +42,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const authClient = client as AuthenticatedSocket;
     authClient.userId = userId;
 
-    this.socketService.joinUserRoom(authClient, userId);
+    void this.socketService.joinUserRoom(authClient, userId);
 
     client.join(`notifications:${userId}`);
     client.join('notifications:global');
