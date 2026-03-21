@@ -44,8 +44,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     void this.socketService.joinUserRoom(authClient, userId);
 
-    client.join(`notifications:${userId}`);
-    client.join('notifications:global');
+    void client.join(`notifications:${userId}`);
+    void client.join('notifications:global');
   }
 
   handleDisconnect(_client: Socket) {}
@@ -54,7 +54,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('presence:subscribe')
   subscribe(@ConnectedSocket() client: Socket, @MessageBody() userIds: number[]) {
     for (const id of userIds) {
-      client.join(`presence:${id}`);
+      void client.join(`presence:${id}`);
     }
   }
 
@@ -62,20 +62,20 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('presence:unsubscribe')
   unsubscribe(@ConnectedSocket() client: Socket, @MessageBody() userIds: number[]) {
     for (const id of userIds) {
-      client.leave(`presence:${id}`);
+      void client.leave(`presence:${id}`);
     }
   }
 
   @SubscribeMessage('notifications:subscribe')
   subscribeNotifications(@ConnectedSocket() client: Socket) {
     const userId = (client as AuthenticatedSocket).userId;
-    client.join(`notifications:${userId}`);
+    void client.join(`notifications:${userId}`);
   }
 
   @SubscribeMessage('notifications:unsubscribe')
   unsubscribeNotifications(@ConnectedSocket() client: Socket) {
     const userId = (client as AuthenticatedSocket).userId;
-    client.leave(`notifications:${userId}`);
+    void client.leave(`notifications:${userId}`);
   }
 
   // emit online
