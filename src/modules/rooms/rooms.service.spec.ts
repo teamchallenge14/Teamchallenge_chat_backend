@@ -24,6 +24,7 @@ import { SortOrder } from './dto/get-rooms.query.dto';
 import { RoomsRepository } from './repository/rooms.repository';
 import { RoomsService } from './rooms.service';
 import { MailService } from '@src/modules/mail/mail.service';
+import { SocketService } from '@src/modules/socket/socket.service';
 
 type RoomsRepositoryMock = {
   createRoomWithRelations: jest.Mock;
@@ -134,6 +135,12 @@ describe('RoomsService', () => {
           provide: MailService,
           useValue: {
             send: jest.fn(),
+          },
+        },
+        {
+          provide: SocketService,
+          useValue: {
+            emit: jest.fn(),
           },
         },
       ],

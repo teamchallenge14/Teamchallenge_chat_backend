@@ -355,4 +355,16 @@ export class RoomsRepository {
       },
     });
   }
+
+  async getAdmins(roomId: string): Promise<string[]> {
+    const admins = await this.prisma.roomMember.findMany({
+      where: {
+        roomId,
+        role: { in: [RoomMemberRole.ADMIN, RoomMemberRole.OWNER] },
+      },
+      select: { userId: true },
+    });
+
+    return admins.map((a) => a.userId);
+  }
 }

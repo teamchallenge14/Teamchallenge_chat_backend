@@ -21,7 +21,8 @@ import { JwtAuthGuard } from '@src/common/guards/jwt-auth.guard';
 import { PermissionGuard } from '@src/common/guards/permission.guard';
 import { TenantModule } from '@src/modules/tenant/tenant.module';
 import { TenantGuard } from '@src/common/guards/tenant.guard';
-import { WebsocketModule } from './modules/websocket/websocket.module';
+import { SocketModule } from '@src/modules/socket/socket.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -46,7 +47,8 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
     RandomMatchModule,
     HealthModule,
     TenantModule,
-    WebsocketModule,
+    SocketModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [

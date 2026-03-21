@@ -19,6 +19,7 @@ import { MediaCreateInput, UploadResult } from './types';
 import { ReportRoomDto } from './dto/report-room.dto';
 import { MailService } from '@src/modules/mail/mail.service';
 import { MailType } from '@src/modules/mail/mail.types';
+import { SocketService } from '@src/modules/socket/socket.service';
 
 @Injectable()
 export class RoomsService {
@@ -28,6 +29,7 @@ export class RoomsService {
     private readonly roomsRepository: RoomsRepository,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
+    private readonly socketService: SocketService,
   ) {}
 
   async create(
@@ -327,6 +329,8 @@ export class RoomsService {
       throw error;
     }
   }
+
+  // join room
   async joinRoom(roomId: string, userId: string) {
     const room = await this.roomsRepository.findRoomById(roomId);
     if (!room) throw new NotFoundException('Room not found');
@@ -338,9 +342,23 @@ export class RoomsService {
       return this.roomsRepository.createMember(roomId, userId);
     }
 
-    return this.roomsRepository.createJoinRequest(roomId, userId);
+    const request = await this.roomsRepository.createJoinRequest(roomId, userId);
+
+    const adminIds = await this.roomsRepository.getAdmins(room.id);
+
+    for (const adminId of adminIds) {
+      this.socketService.sendToUser(adminId, {
+        type: 'CHAT_JOIN_REQUEST',
+        roomId,
+        userId,
+        requestId: request.id,
+      });
+    }
+
+    return request;
   }
 
+  // approve request
   async approveRequest(requestId: string, ownerId: string, action: string) {
     const request = await this.roomsRepository.findJoinRequestById(requestId);
     if (!request) throw new NotFoundException('Request not found');

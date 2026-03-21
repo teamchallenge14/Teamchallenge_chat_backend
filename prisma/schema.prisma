@@ -60,6 +60,8 @@ model User {
   createdAt          DateTime      @default(now())
   emailVerifiedAt    DateTime?
   identityVerifiedAt DateTime?
+  lastSeen  DateTime?
+  isOnline  Boolean  @default(false)
 
   authMethods        AuthMethod[]
   tenants            TenantUser[]
@@ -335,6 +337,7 @@ enum RoomStatus {
 
 enum RoomMemberRole {
   OWNER
+  ADMIN
   MEMBER
 }
 

@@ -421,4 +421,14 @@ export class UsersRepository {
 
     return tenantUser;
   }
+
+  async updateLastSeen(userId: string, lastSeen: Date) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        lastSeen,
+        isOnline: false,
+      },
+    });
+  }
 }
