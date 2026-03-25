@@ -9,5 +9,6 @@ import { MailModule } from '@src/modules/mail/mail.module';
   imports: [CloudinaryModule, MailModule],
   controllers: [RoomsController],
   providers: [RoomsService, RoomsRepository],
+  exports: [RoomsService],
 })
 export class RoomsModule {}

@@ -1,6 +1,7 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { SocketService } from '@src/modules/socket/socket.service';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -8,7 +9,16 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        {
+          provide: SocketService,
+          useValue: {
+            emitToUser: jest.fn(),
+            sendGlobal: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     appController = app.get<AppController>(AppController);

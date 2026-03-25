@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.18] - 2026-03-25
+
+### Added
+
+- Socket event `room:create` with ACK support (`ok/data` or `ok=false/code/message`)
+- Auto-join of room owner socket into `room:{roomId}` right after successful room creation
+- Redis membership persistence for created/joined rooms to support reconnect rejoin
+- Rejoin flow on socket connection from Redis (`userRooms:{userId}`)
+- AsyncAPI contract file: `docs/asyncapi/socket.asyncapi.yaml`
+- Public endpoint to serve AsyncAPI YAML: `GET /docs/asyncapi/socket.asyncapi.yaml`
+- Swagger links to socket docs (raw AsyncAPI YAML and AsyncAPI Studio)
+
+### Changed
+
+- Room creation flow switched to socket-first contract: `SocketGateway -> SocketService -> RoomsService`
+- Socket error mapping for room operations aligned to standardized error codes (`BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `INTERNAL_ERROR`)
+
+### Removed
+
+- REST route for room creation `POST /v1/rooms` (room creation now via `room:create` socket event)
+
 ## [0.0.17] - 2026-02-20
 
 ### Added

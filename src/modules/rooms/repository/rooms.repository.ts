@@ -2,13 +2,31 @@ import { PrismaService } from '@db/prisma.service';
 import { Injectable } from '@nestjs/common';
 import {
   InterestCategory,
+  JoinRequestStatus,
   Prisma,
   RoomLanguage,
   RoomMemberRole,
   RoomStatus,
   RoomType,
 } from '@prisma/client';
-import { CreateRoomDto } from '../dto/create-room.dto';
+import type { CreateRoomInput } from '../contracts/create-room.input';
+
+export type JoinPublicRoomAtomicResult =
+  | {
+      kind: 'JOINED';
+      member: {
+        roomId: string;
+        userId: string;
+        role: RoomMemberRole;
+        joinedAt: Date;
+      };
+    }
+  | {
+      kind: 'ROOM_NOT_FOUND';
+    }
+  | {
+      kind: 'ROOM_NOT_PUBLIC';
+    };
 
 @Injectable()
 export class RoomsRepository {
@@ -29,7 +47,7 @@ export class RoomsRepository {
 
   async createRoomWithRelations(params: {
     userId: string;
-    dto: CreateRoomDto;
+    dto: CreateRoomInput;
     minAge: number;
     maxAge: number;
     languages: RoomLanguage[];
@@ -297,5 +315,111 @@ export class RoomsRepository {
     ]);
 
     return { rooms, total };
+  }
+
+  async findRoomById(roomId: string) {
+    return this.prisma.room.findUnique({
+      where: { id: roomId },
+    });
+  }
+
+  async isMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.findUnique({
+      where: {
+        roomId_userId: { roomId, userId },
+      },
+    });
+  }
+
+  async createMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.create({
+      data: {
+        roomId,
+        userId,
+      },
+    });
+  }
+
+  async joinPublicRoomAtomic(roomId: string, userId: string): Promise<JoinPublicRoomAtomicResult> {
+    return this.prisma.$transaction(async (tx) => {
+      const room = await tx.room.findUnique({
+        where: { id: roomId },
+        select: {
+          id: true,
+          type: true,
+        },
+      });
+
+      if (!room) {
+        return { kind: 'ROOM_NOT_FOUND' };
+      }
+
+      if (room.type !== RoomType.PUBLIC) {
+        return { kind: 'ROOM_NOT_PUBLIC' };
+      }
+
+      const member = await tx.roomMember.create({
+        data: {
+          roomId,
+          userId,
+        },
+        select: {
+          roomId: true,
+          userId: true,
+          role: true,
+          joinedAt: true,
+        },
+      });
+
+      return {
+        kind: 'JOINED',
+        member,
+      };
+    });
+  }
+
+  async removeMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.delete({
+      where: {
+        roomId_userId: { roomId, userId },
+      },
+    });
+  }
+
+  async createJoinRequest(roomId: string, userId: string) {
+    return this.prisma.roomJoinRequest.create({
+      data: {
+        roomId,
+        userId,
+      },
+    });
+  }
+
+  async findJoinRequestById(id: string) {
+    return this.prisma.roomJoinRequest.findUnique({
+      where: { id },
+    });
+  }
+
+  async updateJoinRequest(id: string, status: JoinRequestStatus) {
+    return this.prisma.roomJoinRequest.update({
+      where: { id },
+      data: {
+        status,
+        reviewedAt: new Date(),
+      },
+    });
+  }
+
+  async getAdmins(roomId: string): Promise<string[]> {
+    const admins = await this.prisma.roomMember.findMany({
+      where: {
+        roomId,
+        role: { in: [RoomMemberRole.ADMIN, RoomMemberRole.OWNER] },
+      },
+      select: { userId: true },
+    });
+
+    return admins.map((a) => a.userId);
   }
 }

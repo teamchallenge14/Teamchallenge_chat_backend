@@ -7,6 +7,7 @@ import { IsDateString, IsEnum, IsOptional, IsString, MaxLength, MinLength } from
 export class BaseUserDto {
   @ApiPropertyOptional()
   @Expose()
+  @IsOptional()
   @IsString()
   @MinLength(3)
   @MaxLength(20)
@@ -14,6 +15,7 @@ export class BaseUserDto {
 
   @ApiPropertyOptional()
   @Expose()
+  @IsOptional()
   @IsString()
   @MinLength(3)
   @MaxLength(20)

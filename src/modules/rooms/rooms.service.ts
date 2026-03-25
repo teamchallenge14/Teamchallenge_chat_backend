@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AccountStatus, Prisma, RoomLanguage } from '@prisma/client';
-import { CreateRoomDto } from './dto/create-room.dto';
+import type { CreateRoomInput } from './contracts/create-room.input';
 import { GetRoomsQueryDto, SortOrder } from './dto/get-rooms.query.dto';
 import { CreatedRoomDto, PaginatedRoomsDto, RoomDetailsDto } from './dto/responses';
 import { RoomsRepository } from './repository/rooms.repository';
@@ -32,7 +32,7 @@ export class RoomsService {
 
   async create(
     userId: string | undefined,
-    dto: CreateRoomDto,
+    dto: CreateRoomInput,
     file: Express.Multer.File | undefined,
   ): Promise<CreatedRoomDto> {
     const { ensuredUserId, minAge, maxAge, languages, interestIds } =
@@ -91,7 +91,7 @@ export class RoomsService {
     }
   }
 
-  private async validateCreateInput(userId: string | undefined, dto: CreateRoomDto) {
+  private async validateCreateInput(userId: string | undefined, dto: CreateRoomInput) {
     if (!userId) {
       this.logger.warn('Room creation attempt without authentication');
       throw new UnauthorizedException('User is not authenticated');
@@ -326,6 +326,57 @@ export class RoomsService {
 
       throw error;
     }
+  }
+
+  async joinPublicRoom(roomId: string, userId: string) {
+    try {
+      const result = await this.roomsRepository.joinPublicRoomAtomic(roomId, userId);
+
+      if (result.kind === 'ROOM_NOT_FOUND') {
+        throw new NotFoundException('Room not found');
+      }
+
+      if (result.kind === 'ROOM_NOT_PUBLIC') {
+        throw new ForbiddenException('Room is private');
+      }
+
+      return result.member;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Already a member');
+        }
+
+        if (error.code === 'P2003') {
+          throw new NotFoundException('Room or user not found');
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  // approve request
+  async approveRequest(requestId: string, ownerId: string, action: string) {
+    const request = await this.roomsRepository.findJoinRequestById(requestId);
+    if (!request) throw new NotFoundException('Request not found');
+
+    const room = await this.roomsRepository.findRoomById(request.roomId);
+    if (room?.ownerId !== ownerId) throw new ForbiddenException('Not room owner');
+
+    if (action === 'APPROVE') {
+      await this.roomsRepository.createMember(request.roomId, request.userId);
+      return this.roomsRepository.updateJoinRequest(requestId, 'APPROVED');
+    }
+
+    return this.roomsRepository.updateJoinRequest(requestId, 'REJECTED');
+  }
+
+  async leaveRoom(roomId: string, userId: string) {
+    const member = await this.roomsRepository.isMember(roomId, userId);
+    if (!member) throw new BadRequestException('Not a member');
+
+    return this.roomsRepository.removeMember(roomId, userId);
   }
 }
 

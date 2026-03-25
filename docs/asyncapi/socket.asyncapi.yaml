@@ -1,0 +1,479 @@
+asyncapi: 3.1.0
+id: urn:teamchallenge:chat-backend:socket-api
+defaultContentType: application/json
+info:
+  title: Teamchallenge Chat Backend Socket API
+  version: 0.1.0
+  description: |
+    Current Socket.IO contract implemented in `src/modules/socket`.
+
+    Auth handshake:
+    - Client must provide JWT in `socket.auth.token`, or
+    - Raw JWT in `handshake.headers.authorization`.
+    - If token is missing/invalid, server disconnects socket on connect.
+
+    Ack pattern:
+    - `room:join` and `room:create` support Socket.IO ack callbacks.
+    - Success ack: `{ ok: true, data?: ... }`
+    - Error ack: `{ ok: false, message: string }`
+servers:
+  development:
+    host: dev-api.alicesocial.pp.ua
+    pathname: /socket.io
+    protocol: wss
+    description: Dev server with Socket.IO transport.
+channels:
+  presenceSubscribe:
+    address: presence:subscribe
+    messages:
+      presenceSubscribeMessage:
+        $ref: '#/components/messages/PresenceSubscribeMessage'
+  presenceUnsubscribe:
+    address: presence:unsubscribe
+    messages:
+      presenceUnsubscribeMessage:
+        $ref: '#/components/messages/PresenceUnsubscribeMessage'
+  notificationsSubscribe:
+    address: notifications:subscribe
+    messages:
+      notificationsSubscribeMessage:
+        $ref: '#/components/messages/NotificationsSubscribeMessage'
+  notificationsUnsubscribe:
+    address: notifications:unsubscribe
+    messages:
+      notificationsUnsubscribeMessage:
+        $ref: '#/components/messages/NotificationsUnsubscribeMessage'
+  roomJoin:
+    address: room:join
+    messages:
+      roomJoinMessage:
+        $ref: '#/components/messages/RoomJoinMessage'
+  roomJoined:
+    address: room:joined
+    messages:
+      roomJoinedMessage:
+        $ref: '#/components/messages/RoomJoinedMessage'
+  roomUserJoined:
+    address: room:user_joined
+    messages:
+      roomUserJoinedMessage:
+        $ref: '#/components/messages/RoomUserJoinedMessage'
+  roomCreate:
+    address: room:create
+    messages:
+      roomCreateMessage:
+        $ref: '#/components/messages/RoomCreateMessage'
+  roomCreated:
+    address: room:created
+    messages:
+      roomCreatedMessage:
+        $ref: '#/components/messages/RoomCreatedMessage'
+  userOnline:
+    address: USER_ONLINE
+    messages:
+      userOnlineMessage:
+        $ref: '#/components/messages/UserOnlineMessage'
+  userOffline:
+    address: USER_OFFLINE
+    messages:
+      userOfflineMessage:
+        $ref: '#/components/messages/UserOfflineMessage'
+  newNotification:
+    address: NEW_NOTIFICATION
+    messages:
+      newNotificationMessage:
+        $ref: '#/components/messages/NewNotificationMessage'
+  globalNotification:
+    address: GLOBAL_NOTIFICATION
+    messages:
+      globalNotificationMessage:
+        $ref: '#/components/messages/GlobalNotificationMessage'
+  wsError:
+    address: ws:error
+    messages:
+      wsErrorMessage:
+        $ref: '#/components/messages/WsErrorMessage'
+operations:
+  onPresenceSubscribe:
+    action: receive
+    channel:
+      $ref: '#/channels/presenceSubscribe'
+    messages:
+      - $ref: '#/channels/presenceSubscribe/messages/presenceSubscribeMessage'
+  onPresenceUnsubscribe:
+    action: receive
+    channel:
+      $ref: '#/channels/presenceUnsubscribe'
+    messages:
+      - $ref: '#/channels/presenceUnsubscribe/messages/presenceUnsubscribeMessage'
+  onNotificationsSubscribe:
+    action: receive
+    channel:
+      $ref: '#/channels/notificationsSubscribe'
+    messages:
+      - $ref: '#/channels/notificationsSubscribe/messages/notificationsSubscribeMessage'
+  onNotificationsUnsubscribe:
+    action: receive
+    channel:
+      $ref: '#/channels/notificationsUnsubscribe'
+    messages:
+      - $ref: '#/channels/notificationsUnsubscribe/messages/notificationsUnsubscribeMessage'
+  onRoomJoin:
+    action: receive
+    description: |
+      Client request to join a public room.
+      Recommended listeners for this request flow:
+      - `room:joined`
+      - `room:user_joined`
+      - `ws:error` (fallback)
+    channel:
+      $ref: '#/channels/roomJoin'
+    messages:
+      - $ref: '#/channels/roomJoin/messages/roomJoinMessage'
+    x-ack:
+      success:
+        $ref: '#/components/schemas/SocketAckSuccessRoomJoined'
+      error:
+        $ref: '#/components/schemas/SocketAckError'
+  emitRoomJoined:
+    action: send
+    channel:
+      $ref: '#/channels/roomJoined'
+    messages:
+      - $ref: '#/channels/roomJoined/messages/roomJoinedMessage'
+  emitRoomUserJoined:
+    action: send
+    channel:
+      $ref: '#/channels/roomUserJoined'
+    messages:
+      - $ref: '#/channels/roomUserJoined/messages/roomUserJoinedMessage'
+  onRoomCreate:
+    action: receive
+    description: |
+      Client request to create a room.
+      Recommended listeners for this request flow:
+      - `room:created`
+      - `room:joined` (creator auto-joined as OWNER)
+      - `ws:error` (fallback)
+    channel:
+      $ref: '#/channels/roomCreate'
+    messages:
+      - $ref: '#/channels/roomCreate/messages/roomCreateMessage'
+    x-ack:
+      success:
+        $ref: '#/components/schemas/SocketAckSuccessCreatedRoom'
+      error:
+        $ref: '#/components/schemas/SocketAckError'
+  emitRoomCreated:
+    action: send
+    channel:
+      $ref: '#/channels/roomCreated'
+    messages:
+      - $ref: '#/channels/roomCreated/messages/roomCreatedMessage'
+  emitUserOnline:
+    action: send
+    channel:
+      $ref: '#/channels/userOnline'
+    messages:
+      - $ref: '#/channels/userOnline/messages/userOnlineMessage'
+  emitUserOffline:
+    action: send
+    channel:
+      $ref: '#/channels/userOffline'
+    messages:
+      - $ref: '#/channels/userOffline/messages/userOfflineMessage'
+  emitNewNotification:
+    action: send
+    channel:
+      $ref: '#/channels/newNotification'
+    messages:
+      - $ref: '#/channels/newNotification/messages/newNotificationMessage'
+  emitGlobalNotification:
+    action: send
+    channel:
+      $ref: '#/channels/globalNotification'
+    messages:
+      - $ref: '#/channels/globalNotification/messages/globalNotificationMessage'
+  emitWsError:
+    action: send
+    channel:
+      $ref: '#/channels/wsError'
+    messages:
+      - $ref: '#/channels/wsError/messages/wsErrorMessage'
+components:
+  messages:
+    PresenceSubscribeMessage:
+      name: PresenceSubscribeMessage
+      payload:
+        $ref: '#/components/schemas/UserIdsPayload'
+      examples:
+        - payload: [1, 2, 3]
+    PresenceUnsubscribeMessage:
+      name: PresenceUnsubscribeMessage
+      payload:
+        $ref: '#/components/schemas/UserIdsPayload'
+      examples:
+        - payload: [2, 3]
+    NotificationsSubscribeMessage:
+      name: NotificationsSubscribeMessage
+      payload:
+        $ref: '#/components/schemas/EmptyObjectPayload'
+      examples:
+        - payload: {}
+    NotificationsUnsubscribeMessage:
+      name: NotificationsUnsubscribeMessage
+      payload:
+        $ref: '#/components/schemas/EmptyObjectPayload'
+      examples:
+        - payload: {}
+    RoomJoinMessage:
+      name: RoomJoinMessage
+      payload:
+        $ref: '#/components/schemas/JoinRoomPayload'
+      examples:
+        - payload:
+            roomId: 550e8400-e29b-41d4-a716-446655440000
+    RoomJoinedMessage:
+      name: RoomJoinedMessage
+      payload:
+        $ref: '#/components/schemas/RoomJoinedPayload'
+    RoomUserJoinedMessage:
+      name: RoomUserJoinedMessage
+      payload:
+        $ref: '#/components/schemas/RoomJoinedPayload'
+    RoomCreateMessage:
+      name: RoomCreateMessage
+      payload:
+        $ref: '#/components/schemas/CreateRoomPayload'
+    RoomCreatedMessage:
+      name: RoomCreatedMessage
+      payload:
+        $ref: '#/components/schemas/CreatedRoomPayload'
+    UserOnlineMessage:
+      name: UserOnlineMessage
+      payload:
+        $ref: '#/components/schemas/UserOnlinePayload'
+    UserOfflineMessage:
+      name: UserOfflineMessage
+      payload:
+        $ref: '#/components/schemas/UserOfflinePayload'
+    NewNotificationMessage:
+      name: NewNotificationMessage
+      payload:
+        $ref: '#/components/schemas/NotificationPayload'
+    GlobalNotificationMessage:
+      name: GlobalNotificationMessage
+      payload:
+        $ref: '#/components/schemas/NotificationPayload'
+    WsErrorMessage:
+      name: WsErrorMessage
+      payload:
+        $ref: '#/components/schemas/SocketErrorEvent'
+  schemas:
+    EmptyObjectPayload:
+      type: object
+      additionalProperties: false
+    UserIdsPayload:
+      type: array
+      items:
+        type: integer
+      minItems: 1
+      uniqueItems: true
+    JoinRoomPayload:
+      type: object
+      required: [roomId]
+      additionalProperties: false
+      properties:
+        roomId:
+          type: string
+          format: uuid
+    RoomJoinedPayload:
+      type: object
+      required: [roomId, userId, role, joinedAt]
+      additionalProperties: false
+      properties:
+        roomId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [OWNER, ADMIN, MEMBER]
+        joinedAt:
+          type: string
+          format: date-time
+    SocketErrorEvent:
+      type: object
+      required: [code, message]
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: BAD_REQUEST
+        message:
+          type: string
+          example: roomId must be a valid UUID
+    SocketAckSuccessRoomJoined:
+      type: object
+      required: [ok, data]
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/RoomJoinedPayload'
+    SocketAckSuccessCreatedRoom:
+      type: object
+      required: [ok, data]
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/CreatedRoomPayload'
+    SocketAckError:
+      type: object
+      required: [ok, message]
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          enum: [false]
+        message:
+          type: string
+          example: Already a member
+    CreateRoomPayload:
+      type: object
+      required: [name, type, languages]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: Gaming Night
+        type:
+          type: string
+          enum: [PUBLIC, PRIVATE]
+        minAge:
+          type: integer
+          minimum: 12
+          maximum: 100
+          default: 12
+        maxAge:
+          type: integer
+          minimum: 12
+          maximum: 100
+          default: 100
+        languages:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum: [EN, UK]
+        interestIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+    InterestPayload:
+      type: object
+      required: [id, name, category]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+    MediaPayload:
+      type: object
+      required: [id, resourceType, format, bytes, publicId, url, secureUrl, createdAt]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        originalName:
+          oneOf:
+            - type: string
+            - type: 'null'
+        resourceType:
+          type: string
+        format:
+          type: string
+        bytes:
+          type: integer
+        publicId:
+          type: string
+        url:
+          type: string
+        secureUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CreatedRoomPayload:
+      type: object
+      required: [id, name, type, status, minAge, maxAge, languages, interests, media, createdAt]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [PUBLIC, PRIVATE]
+        status:
+          type: string
+          enum: [ACTIVE]
+        minAge:
+          type: integer
+        maxAge:
+          type: integer
+        languages:
+          type: array
+          items:
+            type: string
+            enum: [EN, UK]
+        interests:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterestPayload'
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaPayload'
+        createdAt:
+          type: string
+          format: date-time
+    UserOnlinePayload:
+      type: object
+      required: [userId]
+      additionalProperties: false
+      properties:
+        userId:
+          type: string
+    UserOfflinePayload:
+      type: object
+      required: [userId, lastSeen]
+      additionalProperties: false
+      properties:
+        userId:
+          type: string
+        lastSeen:
+          type: integer
+    NotificationPayload:
+      type: object
+      description: Generic notification payload. Structure depends on producer.
+      additionalProperties: true
