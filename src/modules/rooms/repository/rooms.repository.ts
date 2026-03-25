@@ -9,7 +9,24 @@ import {
   RoomStatus,
   RoomType,
 } from '@prisma/client';
-import { CreateRoomDto } from '../dto/create-room.dto';
+import type { CreateRoomInput } from '../contracts/create-room.input';
+
+export type JoinPublicRoomAtomicResult =
+  | {
+      kind: 'JOINED';
+      member: {
+        roomId: string;
+        userId: string;
+        role: RoomMemberRole;
+        joinedAt: Date;
+      };
+    }
+  | {
+      kind: 'ROOM_NOT_FOUND';
+    }
+  | {
+      kind: 'ROOM_NOT_PUBLIC';
+    };
 
 @Injectable()
 export class RoomsRepository {
@@ -30,7 +47,7 @@ export class RoomsRepository {
 
   async createRoomWithRelations(params: {
     userId: string;
-    dto: CreateRoomDto;
+    dto: CreateRoomInput;
     minAge: number;
     maxAge: number;
     languages: RoomLanguage[];
@@ -320,6 +337,44 @@ export class RoomsRepository {
         roomId,
         userId,
       },
+    });
+  }
+
+  async joinPublicRoomAtomic(roomId: string, userId: string): Promise<JoinPublicRoomAtomicResult> {
+    return this.prisma.$transaction(async (tx) => {
+      const room = await tx.room.findUnique({
+        where: { id: roomId },
+        select: {
+          id: true,
+          type: true,
+        },
+      });
+
+      if (!room) {
+        return { kind: 'ROOM_NOT_FOUND' };
+      }
+
+      if (room.type !== RoomType.PUBLIC) {
+        return { kind: 'ROOM_NOT_PUBLIC' };
+      }
+
+      const member = await tx.roomMember.create({
+        data: {
+          roomId,
+          userId,
+        },
+        select: {
+          roomId: true,
+          userId: true,
+          role: true,
+          joinedAt: true,
+        },
+      });
+
+      return {
+        kind: 'JOINED',
+        member,
+      };
     });
   }
 

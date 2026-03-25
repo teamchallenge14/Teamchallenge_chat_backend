@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AccountStatus, Prisma, RoomLanguage } from '@prisma/client';
-import { CreateRoomDto } from './dto/create-room.dto';
+import type { CreateRoomInput } from './contracts/create-room.input';
 import { GetRoomsQueryDto, SortOrder } from './dto/get-rooms.query.dto';
 import { CreatedRoomDto, PaginatedRoomsDto, RoomDetailsDto } from './dto/responses';
 import { RoomsRepository } from './repository/rooms.repository';
@@ -19,7 +19,6 @@ import { MediaCreateInput, UploadResult } from './types';
 import { ReportRoomDto } from './dto/report-room.dto';
 import { MailService } from '@src/modules/mail/mail.service';
 import { MailType } from '@src/modules/mail/mail.types';
-import { SocketService } from '@src/modules/socket/socket.service';
 
 @Injectable()
 export class RoomsService {
@@ -29,12 +28,11 @@ export class RoomsService {
     private readonly roomsRepository: RoomsRepository,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
-    private readonly socketService: SocketService,
   ) {}
 
   async create(
     userId: string | undefined,
-    dto: CreateRoomDto,
+    dto: CreateRoomInput,
     file: Express.Multer.File | undefined,
   ): Promise<CreatedRoomDto> {
     const { ensuredUserId, minAge, maxAge, languages, interestIds } =
@@ -93,7 +91,7 @@ export class RoomsService {
     }
   }
 
-  private async validateCreateInput(userId: string | undefined, dto: CreateRoomDto) {
+  private async validateCreateInput(userId: string | undefined, dto: CreateRoomInput) {
     if (!userId) {
       this.logger.warn('Room creation attempt without authentication');
       throw new UnauthorizedException('User is not authenticated');
@@ -330,32 +328,32 @@ export class RoomsService {
     }
   }
 
-  // join room
-  async joinRoom(roomId: string, userId: string) {
-    const room = await this.roomsRepository.findRoomById(roomId);
-    if (!room) throw new NotFoundException('Room not found');
+  async joinPublicRoom(roomId: string, userId: string) {
+    try {
+      const result = await this.roomsRepository.joinPublicRoomAtomic(roomId, userId);
 
-    const existingMember = await this.roomsRepository.isMember(roomId, userId);
-    if (existingMember) throw new BadRequestException('Already a member');
+      if (result.kind === 'ROOM_NOT_FOUND') {
+        throw new NotFoundException('Room not found');
+      }
 
-    if (room.type === 'PUBLIC') {
-      return this.roomsRepository.createMember(roomId, userId);
+      if (result.kind === 'ROOM_NOT_PUBLIC') {
+        throw new ForbiddenException('Room is private');
+      }
+
+      return result.member;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Already a member');
+        }
+
+        if (error.code === 'P2003') {
+          throw new NotFoundException('Room or user not found');
+        }
+      }
+
+      throw error;
     }
-
-    const request = await this.roomsRepository.createJoinRequest(roomId, userId);
-
-    const adminIds = await this.roomsRepository.getAdmins(room.id);
-
-    for (const adminId of adminIds) {
-      this.socketService.sendToUser(adminId, {
-        type: 'CHAT_JOIN_REQUEST',
-        roomId,
-        userId,
-        requestId: request.id,
-      });
-    }
-
-    return request;
   }
 
   // approve request

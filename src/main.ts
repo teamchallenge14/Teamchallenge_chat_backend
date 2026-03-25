@@ -4,6 +4,8 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import { join } from 'path';
+import { type Request, type Response } from 'express';
 
 import { initSentry } from './infra/sentry/sentry.config';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
@@ -19,6 +21,31 @@ import { ChangelogService } from '@src/common/changelog/changelog.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+  });
+
+  const httpServer = app.getHttpAdapter().getInstance();
+  const asyncApiPublicPath = '/docs/asyncapi/socket.asyncapi.yaml';
+  const asyncApiStudioPath = '/docs/asyncapi/studio';
+  const asyncApiFilePath = join(process.cwd(), 'docs', 'asyncapi', 'socket.asyncapi.yaml');
+  const publicApiBase = appConfig.publicApiBaseUrl.replace(/\/$/, '');
+  const asyncApiRawPublicUrl = `${publicApiBase}${asyncApiPublicPath}`;
+  const asyncApiStudioUrl = `https://studio.asyncapi.com/?url=${encodeURIComponent(asyncApiRawPublicUrl)}`;
+
+  httpServer.options(asyncApiPublicPath, (_req: Request, res: Response) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    res.status(204).send();
+  });
+
+  httpServer.get(asyncApiPublicPath, (_req: Request, res: Response) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.type('application/yaml');
+    res.sendFile(asyncApiFilePath);
+  });
+
+  httpServer.get(asyncApiStudioPath, (_req: Request, res: Response) => {
+    res.redirect(asyncApiStudioUrl);
   });
 
   // SENTRY

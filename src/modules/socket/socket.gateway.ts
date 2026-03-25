@@ -1,4 +1,5 @@
 import {
+  Ack,
   WebSocketGateway,
   WebSocketServer,
   OnGatewayConnection,
@@ -8,11 +9,17 @@ import {
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
+import { UseFilters } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { SocketService } from './socket.service';
 import { SocketAuthService } from './socket-auth.service';
 import { AuthenticatedSocket } from './socket.types';
+import { JoinRoomPayloadDto } from './dto/join-room.payload';
+import { CreateRoomPayloadDto } from './dto/create-room.payload';
+import { WsValidationPipe } from './ws-validation.pipe';
+import { WsExceptionFilter } from './ws-exception.filter';
 
+@UseFilters(new WsExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -43,6 +50,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     authClient.userId = userId;
 
     void this.socketService.joinUserRoom(authClient, userId);
+    void this.socketService.rejoinUserRooms(authClient, userId);
 
     void client.join(`notifications:${userId}`);
     void client.join('notifications:global');
@@ -76,6 +84,26 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   unsubscribeNotifications(@ConnectedSocket() client: Socket) {
     const userId = (client as AuthenticatedSocket).userId;
     void client.leave(`notifications:${userId}`);
+  }
+
+  @SubscribeMessage('room:join')
+  joinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody(new WsValidationPipe()) payload: JoinRoomPayloadDto,
+    @Ack()
+    ack?: (response: { ok: boolean; data?: unknown; message?: string }) => void,
+  ) {
+    return this.socketService.handleJoinRoom(client as AuthenticatedSocket, payload, ack);
+  }
+
+  @SubscribeMessage('room:create')
+  createRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody(new WsValidationPipe()) payload: CreateRoomPayloadDto,
+    @Ack()
+    ack?: (response: { ok: boolean; data?: unknown; message?: string }) => void,
+  ) {
+    return this.socketService.handleCreateRoom(client as AuthenticatedSocket, payload, ack);
   }
 
   // emit online

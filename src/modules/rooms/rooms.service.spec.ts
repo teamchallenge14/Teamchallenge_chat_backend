@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
@@ -19,12 +18,11 @@ import {
   Prisma,
 } from '@prisma/client';
 import { CloudinaryService } from '@src/infra/cloudinary/cloudinary.service';
-import { type CreateRoomDto } from './dto/create-room.dto';
+import { type CreateRoomInput } from './contracts/create-room.input';
 import { SortOrder } from './dto/get-rooms.query.dto';
 import { RoomsRepository } from './repository/rooms.repository';
 import { RoomsService } from './rooms.service';
 import { MailService } from '@src/modules/mail/mail.service';
-import { SocketService } from '@src/modules/socket/socket.service';
 
 type RoomsRepositoryMock = {
   createRoomWithRelations: jest.Mock;
@@ -35,6 +33,7 @@ type RoomsRepositoryMock = {
   countReportsByUserSince: jest.Mock;
   createRoomReport: jest.Mock;
   findUserEmail: jest.Mock;
+  joinPublicRoomAtomic: jest.Mock;
 };
 
 type CloudinaryServiceMock = {
@@ -45,7 +44,7 @@ type MailServiceMock = {
   send: jest.Mock;
 };
 
-const baseDto: CreateRoomDto = {
+const baseDto: CreateRoomInput = {
   name: 'Gaming Night',
   type: RoomType.PUBLIC,
   languages: [RoomLanguage.EN, RoomLanguage.EN],
@@ -123,6 +122,7 @@ describe('RoomsService', () => {
             countReportsByUserSince: jest.fn(),
             createRoomReport: jest.fn(),
             findUserEmail: jest.fn(),
+            joinPublicRoomAtomic: jest.fn(),
           },
         },
         {
@@ -135,12 +135,6 @@ describe('RoomsService', () => {
           provide: MailService,
           useValue: {
             send: jest.fn(),
-          },
-        },
-        {
-          provide: SocketService,
-          useValue: {
-            emit: jest.fn(),
           },
         },
       ],
@@ -290,7 +284,7 @@ describe('RoomsService', () => {
       });
       roomsRepository.createRoomWithRelations.mockResolvedValue(buildCreatedRoom());
 
-      const dto: CreateRoomDto = {
+      const dto: CreateRoomInput = {
         name: baseDto.name,
         type: baseDto.type,
         languages: baseDto.languages,
@@ -427,6 +421,61 @@ describe('RoomsService', () => {
       const result = await service.findAll('user-id', { page: 1, limit: 10 });
 
       expect(result.totalPages).toBe(2);
+    });
+  });
+
+  describe('joinPublicRoom', () => {
+    it('joins public room and returns membership', async () => {
+      const joinedAt = new Date('2026-03-25T12:00:00.000Z');
+      roomsRepository.joinPublicRoomAtomic.mockResolvedValue({
+        kind: 'JOINED',
+        member: {
+          roomId: 'room-id',
+          userId: 'user-id',
+          role: RoomMemberRole.MEMBER,
+          joinedAt,
+        },
+      });
+
+      const result = await service.joinPublicRoom('room-id', 'user-id');
+
+      expect(roomsRepository.joinPublicRoomAtomic).toHaveBeenCalledWith('room-id', 'user-id');
+      expect(result).toEqual({
+        roomId: 'room-id',
+        userId: 'user-id',
+        role: RoomMemberRole.MEMBER,
+        joinedAt,
+      });
+    });
+
+    it('throws NotFoundException when room is missing', async () => {
+      roomsRepository.joinPublicRoomAtomic.mockResolvedValue({
+        kind: 'ROOM_NOT_FOUND',
+      });
+
+      await expect(service.joinPublicRoom('room-id', 'user-id')).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ForbiddenException when room is private', async () => {
+      roomsRepository.joinPublicRoomAtomic.mockResolvedValue({
+        kind: 'ROOM_NOT_PUBLIC',
+      });
+
+      await expect(service.joinPublicRoom('room-id', 'user-id')).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('throws ConflictException on unique constraint error', async () => {
+      roomsRepository.joinPublicRoomAtomic.mockRejectedValue(buildPrismaError('P2002'));
+
+      await expect(service.joinPublicRoom('room-id', 'user-id')).rejects.toThrow(ConflictException);
+    });
+
+    it('throws NotFoundException on foreign key error', async () => {
+      roomsRepository.joinPublicRoomAtomic.mockRejectedValue(buildPrismaError('P2003'));
+
+      await expect(service.joinPublicRoom('room-id', 'user-id')).rejects.toThrow(NotFoundException);
     });
   });
 

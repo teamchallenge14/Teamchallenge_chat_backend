@@ -8,14 +8,13 @@ export class SocketAuthService {
 
   async authenticate(client: Socket): Promise<string | null> {
     try {
-      const token =
-        client.handshake.auth?.token || client.handshake.headers?.authorization?.split(' ')[1];
+      const token = client.handshake.auth?.token || client.handshake.headers?.authorization;
 
       if (!token) return null;
 
       const payload = await this.jwtService.verifyAsync(token);
 
-      return payload.sub; // userId
+      return payload.sub;
     } catch {
       return null;
     }

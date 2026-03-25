@@ -4,6 +4,8 @@ import { SocketGateway } from './socket.gateway';
 import { SocketService } from './socket.service';
 import { SocketAuthService } from './socket-auth.service';
 import { jwtConfig } from '@src/config';
+import { RoomsModule } from '@src/modules/rooms/rooms.module';
+import { RedisModule } from '@src/infra/redis/redis.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { jwtConfig } from '@src/config';
         secret: jwtConfig.secret,
       }),
     }),
+    RedisModule,
+    RoomsModule,
   ],
   providers: [SocketGateway, SocketService, SocketAuthService],
   exports: [SocketService],

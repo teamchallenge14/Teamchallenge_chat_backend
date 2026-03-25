@@ -50,11 +50,9 @@ export const routesV1 = {
   },
   rooms: {
     root: roomsRoot,
-    create: `/${roomsRoot}`,
     findAll: `/${roomsRoot}`,
     findOne: `/${roomsRoot}/:id`,
     report: `/${roomsRoot}/:id/report`,
-    join: `/${roomsRoot}/join`,
     approve: `/${roomsRoot}/approve`,
     leave: `/${roomsRoot}/:roomId/leave`,
   },
