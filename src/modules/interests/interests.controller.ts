@@ -12,15 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiParam,
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiOkResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
@@ -32,6 +24,7 @@ import { ImportInterestsResult, InterestsService } from './interests.service';
 import { routesV1 } from '@src/config';
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 import { Public } from '@src/common/decorators';
+import { GetInterestsDocs, ImportInterestsDocs } from './swagger-docs';
 
 const MAX_JSON_FILE_SIZE = 1024 * 1024;
 
@@ -71,21 +64,7 @@ export class InterestsController {
       },
     }),
   )
-  @ApiOperation({ summary: 'Import interests from JSON file (temporary public admin route)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'JSON file with format: { "CATEGORY": ["Interest 1", ...], ... }',
-        },
-      },
-      required: ['file'],
-    },
-  })
+  @ImportInterestsDocs()
   importFromJson(
     @UploadedFile() file: Express.Multer.File | undefined,
   ): Promise<ImportInterestsResult> {
@@ -95,12 +74,7 @@ export class InterestsController {
   // find all
   @Public()
   @Get(routesV1.interests.findAll)
-  @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
-  @ApiOperation({
-    summary: 'Get interests list',
-    description: 'Returns interests with optional category filter, search by name, and pagination.',
-  })
-  @ApiOkResponse({ type: PaginatedInterestsDto })
+  @GetInterestsDocs()
   findAll(@Query() query: GetInterestsQueryDto): Promise<PaginatedInterestsDto> {
     return this.interestsService.findAll(query);
   }
