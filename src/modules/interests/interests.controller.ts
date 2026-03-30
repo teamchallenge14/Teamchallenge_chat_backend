@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,16 +9,30 @@ import {
   Post,
   Query,
   ParseUUIDPipe,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 import { CreateInterestDto } from './dto/create-interests.dto';
 import { UpdateInterestDto } from './dto/update-interests.dto';
 import { InterestCategory } from '@prisma/client';
-import { InterestsService } from './interests.service';
+import { ImportInterestsResult, InterestsService } from './interests.service';
 import { routesV1 } from '@src/config';
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
 import { Public } from '@src/common/decorators';
+
+const MAX_JSON_FILE_SIZE = 1024 * 1024;
 
 @ApiTags(routesV1.interests.root)
 @Controller(routesV1.version)
@@ -31,6 +46,49 @@ export class InterestsController {
   @ApiOperation({ summary: 'Create interest' })
   create(@Body() dto: CreateInterestDto) {
     return this.interestsService.create(dto);
+  }
+
+  // TODO: make this route admin-only once admin permissions are added
+  @Public()
+  @Post(routesV1.interests.import)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: {
+        files: 1,
+        fileSize: MAX_JSON_FILE_SIZE,
+      },
+      fileFilter: (_req, file, cb) => {
+        const hasJsonMime = file.mimetype === 'application/json' || file.mimetype === 'text/json';
+        const hasJsonExtension = file.originalname?.toLowerCase().endsWith('.json');
+
+        if (!hasJsonMime && !hasJsonExtension) {
+          return cb(new BadRequestException('Only JSON files are allowed'), false);
+        }
+
+        return cb(null, true);
+      },
+    }),
+  )
+  @ApiOperation({ summary: 'Import interests from JSON file (temporary public admin route)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'JSON file with format: { "CATEGORY": ["Interest 1", ...], ... }',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  importFromJson(
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<ImportInterestsResult> {
+    return this.interestsService.importFromJsonFile(file);
   }
 
   // find all
