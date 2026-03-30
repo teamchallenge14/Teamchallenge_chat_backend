@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.18] - 2026-03-30
+
+### Added
+
+- POST `/v1/interests/import` endpoint (temporary public admin route) for uploading interests from a JSON file
+- JSON import validation for categories, value types, empty names, and duplicate interest names
+
+### Changed
+
+- GET `/v1/interests` now supports pagination (`page`, `limit`) and case-insensitive name search (`search`) with optional `category` filter
+- GET `/v1/interests` search query now requires at least 3 characters
+- GET `/v1/interests` response is now paginated: `items`, `page`, `limit`, `total`, `totalPages`
+- Interest import skips insertion when the `Interest` table already has records
+- GET `/v1/interests` now returns more specific errors for database timeout/unavailable cases
+
 ## [0.0.17] - 2026-02-20
 
 ### Added

@@ -1,11 +1,16 @@
 import {
   BadRequestException,
   ConflictException,
+  GatewayTimeoutException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 
 import { CreateInterestDto } from './dto/create-interests.dto';
+import { GetInterestsQueryDto } from './dto/get-interests.query.dto';
+import { PaginatedInterestsDto } from './dto/paginated-interests.dto';
 import { UpdateInterestDto } from './dto/update-interests.dto';
 import { InterestCategory, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -29,6 +34,8 @@ const ALL_INTEREST_CATEGORIES = Object.values(InterestCategory) as InterestCateg
 
 @Injectable()
 export class InterestsService {
+  private readonly logger = new Logger(InterestsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateInterestDto) {
@@ -47,11 +54,64 @@ export class InterestsService {
     }
   }
 
-  async findAll(category?: InterestCategory) {
-    return this.prisma.interest.findMany({
-      where: category ? { category } : undefined,
-      orderBy: { name: 'asc' },
-    });
+  async findAll(query: GetInterestsQueryDto): Promise<PaginatedInterestsDto> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+    const normalizedSearch = query.search?.trim();
+
+    const where: Prisma.InterestWhereInput = {
+      ...(query.category ? { category: query.category } : {}),
+      ...(normalizedSearch
+        ? {
+            name: {
+              contains: normalizedSearch,
+              mode: 'insensitive',
+            },
+          }
+        : {}),
+    };
+
+    try {
+      const [items, total] = await this.prisma.$transaction([
+        this.prisma.interest.findMany({
+          where,
+          orderBy: { name: 'asc' },
+          skip,
+          take: limit,
+        }),
+        this.prisma.interest.count({ where }),
+      ]);
+
+      return {
+        items,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      this.logger.warn(
+        `Interests findAll failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2024') {
+          throw new GatewayTimeoutException('Database query timed out');
+        }
+
+        throw new ServiceUnavailableException('Failed to fetch interests from database');
+      }
+
+      if (
+        error instanceof Prisma.PrismaClientInitializationError ||
+        error instanceof Prisma.PrismaClientRustPanicError
+      ) {
+        throw new ServiceUnavailableException('Database is unavailable');
+      }
+
+      throw error;
+    }
   }
 
   async importFromJsonFile(file: Express.Multer.File | undefined): Promise<ImportInterestsResult> {

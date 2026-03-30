@@ -16,17 +16,18 @@ import {
   ApiTags,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
 import { CreateInterestDto } from './dto/create-interests.dto';
+import { GetInterestsQueryDto } from './dto/get-interests.query.dto';
+import { PaginatedInterestsDto } from './dto/paginated-interests.dto';
 import { UpdateInterestDto } from './dto/update-interests.dto';
-import { InterestCategory } from '@prisma/client';
 import { ImportInterestsResult, InterestsService } from './interests.service';
 import { routesV1 } from '@src/config';
 import { AUTH_COOKIES } from '@src/modules/auth/constants/auth-cookies.constants';
@@ -95,10 +96,13 @@ export class InterestsController {
   @Public()
   @Get(routesV1.interests.findAll)
   @ApiBearerAuth(AUTH_COOKIES.ACCESS_TOKEN)
-  @ApiOperation({ summary: 'Get all interests' })
-  @ApiQuery({ name: 'category', enum: InterestCategory, required: false })
-  findAll(@Query('category') category?: InterestCategory) {
-    return this.interestsService.findAll(category);
+  @ApiOperation({
+    summary: 'Get interests list',
+    description: 'Returns interests with optional category filter, search by name, and pagination.',
+  })
+  @ApiOkResponse({ type: PaginatedInterestsDto })
+  findAll(@Query() query: GetInterestsQueryDto): Promise<PaginatedInterestsDto> {
+    return this.interestsService.findAll(query);
   }
 
   // find one
