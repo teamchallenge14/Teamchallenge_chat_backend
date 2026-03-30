@@ -44,6 +44,7 @@ export const routesV1 = {
     root: interestsRoot,
     create: `/${interestsRoot}`,
     findAll: `/${interestsRoot}`,
+    import: `/${interestsRoot}/import`,
     delete: `/${interestsRoot}/:id`,
     findOne: `/${interestsRoot}/:id`,
     update: `/${interestsRoot}/:id`,
