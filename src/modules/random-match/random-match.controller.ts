@@ -1,9 +1,8 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
 
 import { routesV1 } from '@src/config';
-import { RequirePermissions } from '@src/common/decorators';
+import { RequirePermissions, TenantId, UserDecorator } from '@src/common/decorators';
 import { Permission } from '@prisma/client';
 
 import { RandomMatchService } from './random-match.service';
@@ -21,11 +20,10 @@ export class RandomMatchController {
   @StartRandomMatchDocs()
   @HttpCode(HttpStatus.OK)
   startMatch(
-    @Req() req: Request,
+    @UserDecorator('id') userId: string,
+    @TenantId() tenantId: string,
     @Body() dto: StartRandomMatchDto,
   ): Promise<RandomMatchResponseDto> {
-    const { user, tenantId } = req as Request & { user: { id: string }; tenantId: string };
-
-    return this.randomMatchService.startMatch(user.id, tenantId, dto);
+    return this.randomMatchService.startMatch(userId, tenantId, dto);
   }
 }

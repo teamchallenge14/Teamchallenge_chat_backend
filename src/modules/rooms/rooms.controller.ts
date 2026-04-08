@@ -7,14 +7,12 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import type { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
@@ -24,7 +22,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { CreatedRoomDto, PaginatedRoomsDto, RoomDetailsDto } from './dto/responses';
 import { CreateRoomDocs, GetRoomDocs, GetRoomsDocs, ReportRoomDocs } from './swagger-docs';
 import { GetRoomsQueryDto } from './dto/get-rooms.query.dto';
-import { RequirePermissions } from '@src/common/decorators';
+import { RequirePermissions, UserDecorator } from '@src/common/decorators';
 import { Permission } from '@prisma/client';
 import { ReportRoomDto } from './dto/report-room.dto';
 
@@ -53,42 +51,41 @@ export class RoomsController {
   )
   @CreateRoomDocs()
   create(
-    @Req() req: Request,
+    @UserDecorator('id') userId: string,
     @Body() dto: CreateRoomDto,
     @UploadedFile() file: Express.Multer.File | undefined,
   ): Promise<CreatedRoomDto> {
-    const user = req.user as { id?: string } | undefined;
-    return this.roomsService.create(user?.id, dto, file);
+    return this.roomsService.create(userId, dto, file);
   }
 
   @Get(routesV1.rooms.findOne)
   @RequirePermissions([Permission.USER_READ])
   @GetRoomDocs()
   findOne(
-    @Req() req: Request,
+    @UserDecorator('id') userId: string,
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<RoomDetailsDto> {
-    const user = req.user as { id: string };
-    return this.roomsService.findOne(user.id, id);
+    return this.roomsService.findOne(userId, id);
   }
 
   @Get(routesV1.rooms.findAll)
   @RequirePermissions([Permission.USER_READ])
   @GetRoomsDocs()
-  findAll(@Req() req: Request, @Query() query: GetRoomsQueryDto): Promise<PaginatedRoomsDto> {
-    const user = req.user as { id: string };
-    return this.roomsService.findAll(user?.id, query);
+  findAll(
+    @UserDecorator('id') userId: string,
+    @Query() query: GetRoomsQueryDto,
+  ): Promise<PaginatedRoomsDto> {
+    return this.roomsService.findAll(userId, query);
   }
 
   @Post(routesV1.rooms.report)
   @RequirePermissions([Permission.USER_READ])
   @ReportRoomDocs()
   report(
-    @Req() req: Request,
+    @UserDecorator('id') userId: string,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ReportRoomDto,
   ): Promise<{ success: true }> {
-    const user = req.user as { id: string };
-    return this.roomsService.reportRoom(user?.id, id, dto);
+    return this.roomsService.reportRoom(userId, id, dto);
   }
 }

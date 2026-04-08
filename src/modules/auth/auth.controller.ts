@@ -7,6 +7,8 @@ import {
   UnauthorizedException,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { routesV1 } from '@src/config/app/app.routes';
@@ -102,6 +104,7 @@ export class AuthController {
   // =========================
   @Public()
   @Post(routesV1.auth.refresh)
+  @HttpCode(HttpStatus.OK)
   @ApiCookieAuth(AUTH_COOKIES.REFRESH_TOKEN)
   @ApiOperation({
     summary: 'Refresh access token',
@@ -136,6 +139,7 @@ export class AuthController {
   // =========================
   @Public()
   @Post(routesV1.auth.login)
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('local'))
   @ApiOperation({
     summary: 'Login with local credentials',
