@@ -208,6 +208,7 @@ export class UsersService {
       profileTheme: user.data?.profileTheme ?? undefined,
       birthDate: user.data?.birthDate ?? undefined,
       gender: user.data?.gender ?? undefined,
+      allowContactSave: user.data?.allowContactSave ?? undefined,
 
       provider: localAuth?.provider,
       providerId: localAuth?.providerId,
@@ -234,6 +235,7 @@ export class UsersService {
       profileTheme: dto.profileTheme,
       birthDate: dto.birthDate,
       gender: dto.gender,
+      allowContactSave: dto.allowContactSave,
     });
 
     const updatedUser = await this.usersRepository.updateUser(id, {
@@ -263,6 +265,7 @@ export class UsersService {
       profileTheme: updatedUser.data?.profileTheme ?? undefined,
       birthDate: updatedUser.data?.birthDate ?? undefined,
       gender: updatedUser.data?.gender ?? undefined,
+      allowContactSave: updatedUser.data?.allowContactSave ?? undefined,
     };
   }
 

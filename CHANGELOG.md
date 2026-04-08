@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.0.19] - 2026-04-08
+
+### Added
+
+- POST `/v1/contacts` endpoint to save a user as contact within current tenant
+- DELETE `/v1/contacts/:contactUserId` endpoint to remove saved contact
+- `UserContact` model for storing contact links (`ownerUserId -> contactUserId`) with duplicate protection
+- Contact save validations for:
+  - self-add prevention
+  - anonymous guest user restriction (must sign up)
+  - anonymous guest contact restriction
+  - contact privacy restriction (`UserData.allowContactSave`)
+- Contact remove validations for:
+  - self-remove prevention
+  - anonymous guest user restriction (must sign up)
+  - not found when contact relation does not exist
+- Machine-readable contact error `code` passthrough in global HTTP exception responses
+- Unit tests for contact save/remove flow and failure scenarios
+
+### Changed
+
+- `UserData` model now includes `allowContactSave` (default: `true`)
+
 ## [0.0.18] - 2026-03-30
 
 ### Added

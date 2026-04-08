@@ -13,6 +13,7 @@ import { createLogStream } from './infra/logger/log-stream';
 import './config';
 import { appConfig, corsConfig, loggerConfig } from './config';
 import { buildSwaggerConfig } from '@src/infra/swagger/swagger.config';
+import { SWAGGER_CUSTOM_CSS } from '@src/infra/swagger/swagger-ui.styles';
 import { GlobalExceptionFilter } from '@src/common/filters/global-exception.filter';
 import { ChangelogService } from '@src/common/changelog/changelog.service';
 
@@ -87,7 +88,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  SwaggerModule.setup(appConfig.swaggerPath, app, document);
+  SwaggerModule.setup(appConfig.swaggerPath, app, document, {
+    customCss: SWAGGER_CUSTOM_CSS,
+  });
 
   await app.listen(appConfig.port);
 

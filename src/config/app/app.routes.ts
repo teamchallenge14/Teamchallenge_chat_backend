@@ -4,6 +4,7 @@ const authRoot = 'auth';
 const mailRoot = 'mail';
 const interestsRoot = 'interests';
 const roomsRoot = 'rooms';
+const contactsRoot = 'contacts';
 const mediaRoot = 'media';
 const randomMatchRoot = 'random-match';
 const tenantsRoot = 'tenant';
@@ -55,6 +56,11 @@ export const routesV1 = {
     findAll: `/${roomsRoot}`,
     findOne: `/${roomsRoot}/:id`,
     report: `/${roomsRoot}/:id/report`,
+  },
+  contacts: {
+    root: contactsRoot,
+    create: `/${contactsRoot}`,
+    delete: `/${contactsRoot}/:contactUserId`,
   },
   media: {
     root: mediaRoot,

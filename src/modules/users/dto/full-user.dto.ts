@@ -73,6 +73,12 @@ export class FullUserDto {
   })
   gender?: Gender;
 
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Allow other users to save this profile in contacts',
+  })
+  allowContactSave?: boolean;
+
   @ApiProperty({
     enum: AuthProvider,
     example: AuthProvider.LOCAL,

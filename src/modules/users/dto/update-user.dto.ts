@@ -10,6 +10,7 @@ import {
   IsUUID,
   IsArray,
   IsDateString,
+  IsBoolean,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
 
@@ -108,6 +109,14 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Allow other users to save this profile in contacts',
+  })
+  @IsOptional()
+  @IsBoolean()
+  allowContactSave?: boolean;
 
   // interest
 

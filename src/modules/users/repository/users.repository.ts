@@ -198,6 +198,7 @@ export class UsersRepository {
             profileTheme: true,
             birthDate: true,
             gender: true,
+            allowContactSave: true,
           },
         },
 
@@ -233,6 +234,7 @@ export class UsersRepository {
         profileTheme?: string;
         birthDate?: Date;
         gender?: Gender;
+        allowContactSave?: boolean;
       };
     },
   ) {
@@ -300,6 +302,7 @@ export class UsersRepository {
               profileTheme: true,
               birthDate: true,
               gender: true,
+              allowContactSave: true,
             },
           },
         },

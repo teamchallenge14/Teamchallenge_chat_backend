@@ -14,6 +14,7 @@ model Tenant {
 
   domains     TenantDomain[]
   users       TenantUser[]
+  contacts    UserContact[]
 }
 
 model TenantDomain {
@@ -69,6 +70,8 @@ model User {
   ownedRooms         Room[]        @relation("RoomOwner")
   roomMembers        RoomMember[]
   roomReports        RoomReport[]
+  ownedContacts      UserContact[] @relation("UserOwnedContacts")
+  savedAsContactBy   UserContact[] @relation("UserSavedAsContact")
   emailVerifications EmailVerification[]
   passwordResets PasswordReset[]
 }
@@ -100,9 +103,26 @@ model UserData {
   birthDate    DateTime?
   gender       Gender   @default(UNSPECIFIED)
   language     RoomLanguage?
+  allowContactSave Boolean @default(true)
   updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model UserContact {
+  id            String   @id @default(uuid())
+  tenantId      String
+  ownerUserId   String
+  contactUserId String
+  createdAt     DateTime @default(now())
+
+  tenant  Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner   User   @relation("UserOwnedContacts", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  contact User   @relation("UserSavedAsContact", fields: [contactUserId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, ownerUserId, contactUserId])
+  @@index([tenantId, ownerUserId, createdAt])
+  @@index([tenantId, contactUserId])
 }
 
 model Interest {
